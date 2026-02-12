@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="f2g1.png" alt="Fafi2Go Logo" width="120px">
+  <img src="static/f2g1.png" alt="Fafi2Go Logo" width="120px">
 </p>
 
 <h1 align="center">Fafi2Go (F2G)</h1>
