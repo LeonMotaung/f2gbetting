@@ -24,7 +24,7 @@
 
 ### Key Visuals
 <p align="center">
-  <img src="f2g.png" alt="Fafi2Go Card Design" width="400px" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <img src="static/f2g.png" alt="Fafi2Go Card Design" width="400px" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
   <br>
   <em>Premium User Interface for Leon Motaung</em>
 </p>
