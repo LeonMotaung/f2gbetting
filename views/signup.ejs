@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Fafi2Go</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+        }
+
+        .hero-gradient {
+            background: radial-gradient(circle at center, #1e293b 0%, #0b0f1a 100%);
+        }
+    </style>
+</head>
+
+<body class="text-white hero-gradient min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-10">
+            <img src="/static/f2g.png" alt="F2G Logo" class="w-24 h-24 mx-auto mb-4 object-contain">
+            <h1 class="text-3xl font-black uppercase">Create Account</h1>
+            <p class="text-slate-400">Join the winning team today</p>
+        </div>
+
+        <!-- Error Alert -->
+        <div id="error-alert"
+            class="hidden mb-6 bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-xl text-sm font-bold text-center">
+        </div>
+
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            if (error) {
+                const errorAlert = document.getElementById('error-alert');
+                errorAlert.textContent = error;
+                errorAlert.classList.remove('hidden');
+            }
+        </script>
+
+        <form action="/signup" method="POST" class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">First Name</label>
+                    <input type="text" name="firstName"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-yellow-500 outline-none transition-colors"
+                        placeholder="John">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Last Name</label>
+                    <input type="text" name="lastName"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-yellow-500 outline-none transition-colors"
+                        placeholder="Doe">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Email Address</label>
+                <input type="email" name="email"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-yellow-500 outline-none transition-colors"
+                    placeholder="you@example.com">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Password</label>
+                <input type="password" name="password"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-yellow-500 outline-none transition-colors"
+                    placeholder="••••••••">
+            </div>
+
+            <button type="submit"
+                class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl shadow-lg shadow-yellow-500/20 active:scale-95 transition-transform uppercase tracking-widest">
+                Create Account
+            </button>
+        </form>
+
+        <p class="text-center mt-8 text-slate-500 text-sm">
+            Already have an account? <a href="/login" class="text-yellow-500 font-bold hover:text-yellow-400">Login</a>
+        </p>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js');
+        }
+    </script>
+</body>
+
+</html>

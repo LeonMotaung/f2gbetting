@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Deposit | Fafi2Go</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+            color: white;
+        }
+
+        .input-focus:focus {
+            border-color: #eab308;
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.1);
+        }
+
+        .method-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+
+        .method-card.active {
+            border-color: #eab308;
+            background: rgba(234, 179, 8, 0.1);
+        }
+    </style>
+</head>
+
+<body class="pb-24">
+
+    <header class="p-6 flex items-center gap-4">
+        <a href="/wallet" class="text-slate-400"><i class="fas fa-arrow-left text-xl"></i></a>
+        <h1 class="text-xl font-black uppercase tracking-tight">Deposit Funds</h1>
+    </header>
+
+    <main class="px-6">
+
+        <form action="/deposit" method="POST" class="space-y-6">
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Amount to Deposit
+                    (ZAR)</label>
+                <div class="relative">
+                    <span class="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-yellow-500">R</span>
+                    <input type="number" name="amount" placeholder="0.00"
+                        class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 pl-12 text-2xl font-black outline-none transition-all input-focus">
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button type="button" onclick="setAmount(50)"
+                        class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">R50</button>
+                    <button type="button" onclick="setAmount(100)"
+                        class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">R100</button>
+                    <button type="button" onclick="setAmount(200)"
+                        class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">R200</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Payment Method</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="method-card active rounded-2xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                        onclick="selectMethod(this)">
+                        <i class="fas fa-bolt text-yellow-500 text-2xl"></i>
+                        <span class="text-xs font-bold">Instant EFT</span>
+                    </div>
+                    <div class="method-card rounded-2xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                        onclick="selectMethod(this)">
+                        <i class="fas fa-credit-card text-slate-400 text-2xl"></i>
+                        <span class="text-xs font-bold text-slate-400">Card</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-2xl flex gap-3">
+                <i class="fas fa-shield-alt text-yellow-500 mt-1"></i>
+                <p class="text-[11px] text-yellow-200 leading-tight">
+                    Payments are processed securely. Funds will reflect in your wallet instantly.
+                </p>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-yellow-500 text-black font-black py-5 rounded-2xl text-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-transform uppercase tracking-widest">
+                Top Up Wallet
+            </button>
+        </form>
+    </main>
+
+    <script>
+        function setAmount(val) {
+            document.querySelector('input[name="amount"]').value = val;
+        }
+
+        function selectMethod(el) {
+            document.querySelectorAll('.method-card').forEach(c => {
+                c.classList.remove('active');
+                c.querySelector('i').classList.remove('text-yellow-500');
+                c.querySelector('i').classList.add('text-slate-400');
+                c.querySelector('span').classList.add('text-slate-400');
+            });
+            el.classList.add('active');
+            el.querySelector('i').classList.add('text-yellow-500');
+            el.querySelector('i').classList.remove('text-slate-400');
+            el.querySelector('span').classList.remove('text-slate-400');
+        }
+    </script>
+</body>
+
+</html>

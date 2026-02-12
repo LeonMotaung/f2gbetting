@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wallet | Fafi2Go</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+            color: white;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            box-shadow: 0 10px 30px rgba(234, 179, 8, 0.2);
+        }
+
+        .transaction-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="pb-24">
+
+    <header class="p-6 flex justify-between items-center">
+        <h1 class="text-2xl font-black uppercase">My Wallet</h1>
+        <button class="bg-slate-800 p-3 rounded-full"><i class="fas fa-bell"></i></button>
+    </header>
+
+    <main class="px-6">
+        <div class="balance-card rounded-3xl p-8 text-black mb-8 relative overflow-hidden">
+            <div class="relative z-10">
+                <span class="text-xs font-bold uppercase opacity-70">Total Balance</span>
+                <h2 class="text-4xl font-black mt-1">R <%= user.walletBalance.toFixed(2) %>
+                </h2>
+                <div class="flex gap-4 mt-6">
+                    <a href="/deposit"
+                        class="bg-black text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all inline-block items-center justify-center flex">Deposit</a>
+                    <button
+                        class="bg-white/30 backdrop-blur-md text-black px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all">Withdraw</button>
+                </div>
+            </div>
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block">Total Won</span>
+                <span class="text-lg font-bold text-green-400">R <%= user.totalWonAmount.toFixed(2) %></span>
+            </div>
+            <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block">Active Bets</span>
+                <span class="text-lg font-bold text-yellow-500">
+                    <%= activeBetsCount %> Tickets
+                </span>
+            </div>
+        </div>
+
+        <div>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg">History</h3>
+                <a href="/bank-accounts" class="text-yellow-500 text-xs font-bold">View All</a>
+            </div>
+
+            <div class="space-y-1">
+                <% if (recentTransactions.length===0) { %>
+                    <p class="text-center text-slate-500 py-4 text-xs">No recent transactions</p>
+                    <% } else { %>
+                        <% recentTransactions.forEach(transaction=> { %>
+                            <div class="transaction-item py-4 flex justify-between items-center">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 <%= transaction.type === 'deposit' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500' %> rounded-full flex items-center justify-center">
+                                        <i
+                                            class="fas <%= transaction.type === 'deposit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm capitalize">
+                                            <%= transaction.description || transaction.type %>
+                                        </p>
+                                        <p class="text-[10px] text-slate-500">
+                                            <%= new Date(transaction.date).toLocaleString() %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <span
+                                    class="font-black <%= transaction.type === 'deposit' ? 'text-green-400' : 'text-slate-300' %>">
+                                    <%= transaction.type==='deposit' ? '+' : '-' %> R <%= transaction.amount.toFixed(2)
+                                            %>
+                                </span>
+                            </div>
+                            <% }) %>
+                                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <nav
+        class="fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 flex justify-around p-4">
+        <a href="/game" class="text-slate-500 flex flex-col items-center gap-1"><i class="fas fa-home"></i><span
+                class="text-[8px]">HOME</span></a>
+        <a href="/results" class="text-slate-500 flex flex-col items-center gap-1"><i class="fas fa-chart-bar"></i><span
+                class="text-[8px]">RESULTS</span></a>
+        <a href="/wallet" class="text-yellow-500 flex flex-col items-center gap-1"><i class="fas fa-wallet"></i><span
+                class="text-[8px]">WALLET</span></a>
+        <a href="/profile" class="text-slate-500 flex flex-col items-center gap-1"><i class="fas fa-user"></i><span
+                class="text-[8px]">PROFILE</span></a>
+    </nav>
+
+</body>
+
+</html>

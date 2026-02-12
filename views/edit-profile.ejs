@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Edit Profile | Fafi2Go</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="pb-24">
+
+    <header class="pt-8 pb-4 px-6 flex items-center justify-between bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <a href="/profile" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h2 class="text-xl font-black uppercase">Edit Profile</h2>
+        <div class="w-10"></div>
+    </header>
+
+    <main class="px-6 py-6 space-y-8">
+
+        <form action="/edit-profile" method="POST" enctype="multipart/form-data" class="space-y-6">
+
+            <div class="flex flex-col items-center gap-4">
+                <div class="relative">
+                    <div class="w-28 h-28 bg-slate-800 rounded-full border-4 border-slate-700 overflow-hidden">
+                        <img src="<%= user.profilePicture %>" alt="Profile" class="w-full h-full object-cover"
+                            id="preview-image">
+                    </div>
+                    <label for="profilePicture"
+                        class="absolute bottom-1 right-1 bg-yellow-500 text-black w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-lg active:scale-95 transition-transform">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" name="profilePicture" id="profilePicture" class="hidden" accept="image/*"
+                        onchange="previewFile()">
+                </div>
+                <p class="text-xs text-slate-500 font-bold uppercase">Tap camera to change photo</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">First Name</label>
+                    <input type="text" name="firstName" value="<%= user.firstName %>"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-yellow-500 outline-none transition-colors">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Last Name</label>
+                    <input type="text" name="lastName" value="<%= user.lastName %>"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-yellow-500 outline-none transition-colors">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Email (Read Only)</label>
+                    <input type="email" value="<%= user.email %>" readonly
+                        class="w-full bg-slate-900/50 border border-slate-800 rounded-xl p-4 text-slate-500 cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Phone Number</label>
+                    <input type="tel" name="phone" value="<%= user.phone || '' %>" placeholder="Enter phone number"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-yellow-500 outline-none transition-colors">
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl shadow-lg shadow-yellow-500/20 active:scale-95 transition-transform uppercase tracking-widest mt-8">
+                Save Changes
+            </button>
+        </form>
+
+    </main>
+
+    <script>
+        function previewFile() {
+            const preview = document.getElementById('preview-image');
+            const file = document.querySelector('input[type=file]').files[0];
+            const reader = new FileReader();
+
+            reader.addEventListener("load", function () {
+                preview.src = reader.result;
+            }, false);
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+
+</html>

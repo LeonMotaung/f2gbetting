@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bank Accounts | Fafi2Go</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+            color: white;
+        }
+
+        .transaction-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="pb-24">
+
+    <header class="p-6 flex items-center gap-4 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <a href="/profile" class="text-slate-400"><i class="fas fa-arrow-left text-xl"></i></a>
+        <h1 class="text-xl font-black uppercase tracking-tight">Transaction History</h1>
+    </header>
+
+    <main class="px-6 space-y-6">
+
+        <% if (transactions.length===0) { %>
+            <div class="text-center py-20">
+                <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exchange-alt text-slate-500 text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-lg">No Transactions Yet</h3>
+                <p class="text-slate-500 text-sm mt-2">Make a deposit to get started!</p>
+                <a href="/wallet"
+                    class="inline-block mt-6 bg-yellow-500 text-black font-bold px-6 py-3 rounded-xl uppercase text-xs tracking-widest">Go
+                    to Wallet</a>
+            </div>
+            <% } else { %>
+                <div class="space-y-1">
+                    <% transactions.forEach(transaction=> { %>
+                        <div class="transaction-item py-4 flex justify-between items-center">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-10 h-10 <%= transaction.type === 'deposit' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500' %> rounded-full flex items-center justify-center">
+                                    <i
+                                        class="fas <%= transaction.type === 'deposit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm capitalize">
+                                        <%= transaction.type %>
+                                    </p>
+                                    <p class="text-[10px] text-slate-500">
+                                        <%= new Date(transaction.date).toLocaleString() %>
+                                    </p>
+                                </div>
+                            </div>
+                            <span
+                                class="font-black <%= transaction.type === 'deposit' ? 'text-green-400' : 'text-slate-300' %>">
+                                <%= transaction.type==='deposit' ? '+' : '-' %> R <%= transaction.amount.toFixed(2) %>
+                            </span>
+                        </div>
+                        <% }) %>
+                </div>
+                <% } %>
+
+    </main>
+
+</body>
+
+</html>

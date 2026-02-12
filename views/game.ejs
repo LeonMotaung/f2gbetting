@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fafi2Go | Dream to Wealth</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .number-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .number-card:active {
+            transform: scale(0.95);
+        }
+
+        .hot-odds {
+            animation: pulse 1.5s infinite;
+            color: #fbbf24;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="text-slate-200 pb-24">
+
+    <nav class="sticky top-0 z-50 glass border-b border-slate-700 p-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-yellow-500 text-slate-900 p-1.5 rounded-lg font-black italic text-xl">F2G</div>
+            <span class="font-black text-xl tracking-tighter uppercase">Fafi<span
+                    class="text-yellow-500">2</span>Go</span>
+        </div>
+        <div class="bg-slate-800 px-4 py-2 rounded-full border border-slate-600">
+            <span class="text-xs text-slate-400 mr-1 font-bold">WALLET:</span>
+            <span class="text-green-400 font-mono font-bold">R <%= user.walletBalance.toFixed(2) %></span>
+        </div>
+    </nav>
+
+    <div class="bg-blue-600/20 border-b border-blue-500/30 p-2 text-center">
+        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
+            <i class="fas fa-shield-halved mr-1"></i> Provably Fair: Current Round Hash: <span
+                class="font-mono">8f3e...2a1c</span>
+        </p>
+    </div>
+
+    <section class="p-6">
+        <h2 class="text-2xl font-black mb-4 uppercase">What did you <span
+                class="text-yellow-500 underline">dream</span>?</h2>
+        <div class="relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            <input type="text" id="search" placeholder="Search (e.g. Tiger, Blood, Snake...)"
+                class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl p-4 pl-12 focus:border-yellow-500 focus:outline-none text-lg transition-all">
+        </div>
+    </section>
+
+    <main class="px-6 grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="fafiGrid">
+    </main>
+
+    <div id="betPanel"
+        class="fixed bottom-0 left-0 w-full glass border-t border-slate-700 p-4 translate-y-full transition-transform z-50">
+        <div class="max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <span class="text-slate-400 text-xs font-bold block uppercase">Selected Number</span>
+                    <span id="displayNum" class="text-3xl font-black text-yellow-500">#0</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-slate-400 text-xs font-bold block uppercase">Est. Payout</span>
+                    <span id="displayOdds" class="text-xl font-black text-green-400">x15.0</span>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <input type="number" id="stake" value="10"
+                    class="w-1/3 bg-slate-900 border border-slate-600 rounded-xl p-3 text-center font-bold">
+                <button onclick="confirmBet()"
+                    class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black rounded-xl py-3 shadow-lg shadow-yellow-500/20 transition-all">
+                    PLACE BET
+                </button>
+                <button onclick="togglePanel(false)" class="bg-slate-700 p-3 rounded-xl"><i
+                        class="fas fa-times"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fafiData = [
+  { n: 1, title: "Water", tags: ["river", "sea", "drink", "bath", "rain"] },
+  { n: 2, title: "Fish", tags: ["sea", "food", "luck", "wealth"] },
+  { n: 3, title: "Snake", tags: ["enemy", "danger", "betrayal", "fear"] },
+  { n: 4, title: "Old Woman", tags: ["granny", "witch", "wisdom"] },
+  { n: 5, title: "Tiger", tags: ["fight", "power", "strong man"] },
+  { n: 6, title: "Money", tags: ["cash", "gold", "riches", "payment"] },
+  { n: 7, title: "Accident", tags: ["injury", "crash", "trouble"] },
+  { n: 8, title: "Child", tags: ["baby", "son", "daughter"] },
+  { n: 9, title: "Fire", tags: ["burning", "anger", "heat"] },
+  { n: 10, title: "Dog", tags: ["friend", "loyalty", "protector"] },
+  { n: 11, title: "Cow", tags: ["cattle", "wealth", "bride price"] },
+  { n: 12, title: "Prison", tags: ["jail", "arrest", "police"] },
+  { n: 13, title: "Death", tags: ["ending", "loss", "funeral"] },
+  { n: 14, title: "Drunk Man", tags: ["alcohol", "beer", "party"] },
+  { n: 15, title: "Woman", tags: ["lady", "girlfriend", "wife"] },
+  { n: 16, title: "Man", tags: ["husband", "boyfriend", "male"] },
+  { n: 17, title: "Wedding", tags: ["marriage", "bride", "groom"] },
+  { n: 18, title: "Coffin", tags: ["funeral", "box", "death"] },
+  { n: 19, title: "Doctor", tags: ["hospital", "medicine", "healing"] },
+  { n: 20, title: "House", tags: ["home", "building", "family"] },
+  { n: 21, title: "Mountain", tags: ["hill", "obstacle", "strength"] },
+  { n: 22, title: "Road", tags: ["path", "journey", "travel"] },
+  { n: 23, title: "Family", tags: ["relatives", "home", "unity"] },
+  { n: 24, title: "Car", tags: ["taxi", "transport", "travel"] },
+  { n: 25, title: "Policeman", tags: ["law", "arrest", "authority"] },
+  { n: 26, title: "Tree", tags: ["growth", "life", "roots"] },
+  { n: 27, title: "Bird", tags: ["freedom", "news", "message"] },
+  { n: 28, title: "Love", tags: ["romance", "relationship", "heart"] },
+  { n: 29, title: "Rain", tags: ["blessing", "weather", "cleansing"] },
+  { n: 30, title: "Church", tags: ["prayer", "faith", "religion"] },
+  { n: 31, title: "Shoes", tags: ["journey", "movement", "travel"] },
+  { n: 32, title: "Baby", tags: ["newborn", "new beginning"] },
+  { n: 33, title: "Bed", tags: ["sleep", "rest", "sex"] },
+  { n: 34, title: "School", tags: ["education", "learning", "teacher"] },
+  { n: 35, title: "Knife", tags: ["danger", "fight", "weapon"] },
+  { n: 36, title: "River", tags: ["flow", "water", "journey"] },
+  { n: 37, title: "Thief", tags: ["stealing", "loss", "crime"] },
+  { n: 38, title: "Gun", tags: ["violence", "danger", "threat"] },
+  { n: 39, title: "Visitor", tags: ["guest", "arrival", "news"] },
+  { n: 40, title: "Grave", tags: ["burial", "death", "ending"] },
+  { n: 41, title: "Mirror", tags: ["reflection", "self", "truth"] },
+  { n: 42, title: "New Shoes", tags: ["new journey", "change"] },
+  { n: 43, title: "Food", tags: ["eating", "hunger", "feast"] },
+  { n: 44, title: "Phone", tags: ["message", "call", "news"] },
+  { n: 45, title: "Blood", tags: ["injury", "family", "danger"] },
+  { n: 46, title: "Shop", tags: ["market", "buying", "selling"] },
+  { n: 47, title: "Road Accident", tags: ["crash", "danger", "warning"] },
+  { n: 48, title: "Boss", tags: ["work", "authority", "manager"] },
+  { n: 49, title: "Dream", tags: ["vision", "message", "sign"] },
+  { n: 50, title: "Angel", tags: ["protection", "spirit", "guidance"] },
+  { n: 51, title: "Journey", tags: ["travel", "movement", "change"] },
+  { n: 52, title: "Luck", tags: ["chance", "fortune", "win"] }
+];
+
+
+        const grid = document.getElementById('fafiGrid');
+        const search = document.getElementById('search');
+        let currentOdds = {};
+
+        function init() {
+            fetchOdds();
+            setInterval(fetchOdds, 5000); // Refresh odds every 5 seconds
+            search.addEventListener('input', (e) => render(e.target.value));
+        }
+
+        async function fetchOdds() {
+            try {
+                const res = await fetch('/api/odds');
+                const data = await res.json();
+                currentOdds = data.odds;
+                render(search.value);
+            } catch (err) {
+                console.error("Failed to fetch odds", err);
+            }
+        }
+
+        function render(filter = "") {
+            grid.innerHTML = "";
+            const filtered = fafiData.filter(item =>
+                item.title.toLowerCase().includes(filter.toLowerCase()) ||
+                item.tags.some(t => t.toLowerCase().includes(filter.toLowerCase())) ||
+                item.n.toString() === filter
+            );
+
+            filtered.forEach(item => {
+                // REAL ODDS LOGIC
+                const odds = currentOdds[item.n] || 28.00; // Default to 28x if not found
+
+                // Calculate simulated popularity for visual bar (inverse of odds)
+                // Base 28. If odds 28 -> 0% pop. If odds 1.5 -> 100% pop.
+                const popularity = Math.max(0, Math.min(100, ((28 - odds) / 26.5) * 100));
+
+                const card = document.createElement('div');
+                card.className = "number-card glass p-5 rounded-3xl border border-slate-700 cursor-pointer hover:border-yellow-500 group";
+                card.onclick = () => selectNumber(item.n, odds);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="text-5xl font-black text-slate-700 group-hover:text-yellow-500/20 transition-colors">#${item.n}</div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-slate-500 block">LIVE ODDS</span>
+                            <span class="text-lg font-black text-green-400">${odds.toFixed(2)}x</span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-black text-white uppercase group-hover:text-yellow-500">${item.title}</h3>
+                    <p class="text-slate-400 text-xs mt-2 italic leading-tight">${item.tags.join(", ")}</p>
+                    <div class="mt-4 flex items-center gap-2">
+                         <div class="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-yellow-500" style="width: ${popularity}%"></div>
+                         </div>
+                         <i class="fas fa-fire ${popularity > 50 ? 'hot-odds' : 'text-slate-700'} text-[10px]"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        let selectedNumber = null;
+
+        function selectNumber(num, odds) {
+            selectedNumber = num;
+            document.getElementById('displayNum').innerText = "#" + num;
+            document.getElementById('displayOdds').innerText = "x" + odds.toFixed(2);
+            togglePanel(true);
+        }
+
+        function togglePanel(show) {
+            const panel = document.getElementById('betPanel');
+            panel.style.transform = show ? "translateY(0)" : "translateY(100%)";
+        }
+
+        async function confirmBet() {
+            const amount = document.getElementById('stake').value;
+            if (!selectedNumber || !amount) return;
+
+            try {
+                const res = await fetch('/bet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ number: selectedNumber, amount: parseFloat(amount) })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    // Update Wallet Display
+                    document.querySelector('.font-mono').innerText = `R ${data.newBalance.toFixed(2)}`;
+                    togglePanel(false);
+                    fetchOdds(); // Refresh odds immediately
+                } else {
+                    alert(data.error || "Bet failed");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Failed to place bet");
+            }
+        }
+
+        init();
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js');
+        }
+    </script>
+    <nav
+        class="fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 flex justify-around p-4 z-40">
+        <a href="/game" class="text-yellow-500 flex flex-col items-center gap-1"><i class="fas fa-home"></i><span
+                class="text-[8px]">HOME</span></a>
+        <a href="/results" class="text-slate-500 flex flex-col items-center gap-1"><i class="fas fa-chart-bar"></i><span
+                class="text-[8px]">RESULTS</span></a>
+        <a href="/wallet" class="text-slate-500 flex flex-col items-center gap-1"><i class="fas fa-wallet"></i><span
+                class="text-[8px]">WALLET</span></a>
+        <a href="/profile" class="text-slate-500 flex flex-col items-center gap-1"><i class="fas fa-user"></i><span
+                class="text-[8px]">PROFILE</span></a>
+    </nav>
+</body>
+
+</html>

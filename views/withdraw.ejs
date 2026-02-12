@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Withdraw | Fafi2Go</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+            color: white;
+        }
+
+        .input-focus:focus {
+            border-color: #eab308;
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.1);
+        }
+
+        .bank-pill {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="pb-24">
+
+    <header class="p-6 flex items-center gap-4">
+        <a href="/wallet" class="text-slate-400"><i class="fas fa-arrow-left text-xl"></i></a>
+        <h1 class="text-xl font-black uppercase tracking-tight">Withdraw Funds</h1>
+    </header>
+
+    <main class="px-6">
+        <div class="bg-slate-900/50 rounded-3xl p-6 border border-slate-800 mb-8 flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-500 uppercase">Available for Withdrawal</p>
+                <h2 class="text-2xl font-black text-white">R 1,250.00</h2>
+            </div>
+            <i class="fas fa-wallet text-yellow-500/20 text-4xl"></i>
+        </div>
+
+        <form action="#" method="POST" class="space-y-6">
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Amount to Withdraw
+                    (ZAR)</label>
+                <div class="relative">
+                    <span class="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-yellow-500">R</span>
+                    <input type="number" name="amount" placeholder="0.00"
+                        class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 pl-12 text-2xl font-black outline-none transition-all input-focus">
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button type="button" onclick="setAmount(100)"
+                        class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">R100</button>
+                    <button type="button" onclick="setAmount(500)"
+                        class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">R500</button>
+                    <button type="button" onclick="setAmount(1250)"
+                        class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">MAX</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Send To</label>
+                <div class="bank-pill rounded-2xl p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center">
+                            <i class="fas fa-university text-slate-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">Standard Bank</p>
+                            <p class="text-[10px] text-slate-500">Savings Account •••• 4821</p>
+                        </div>
+                    </div>
+                    <button type="button" class="text-yellow-500 text-[10px] font-black uppercase">Change</button>
+                </div>
+            </div>
+
+            <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl flex gap-3">
+                <i class="fas fa-info-circle text-blue-400 mt-1"></i>
+                <p class="text-[11px] text-blue-200 leading-tight">
+                    Withdrawals are processed within 24 hours. Minimum withdrawal is R50.00.
+                </p>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-yellow-500 text-black font-black py-5 rounded-2xl text-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-transform uppercase tracking-widest">
+                Confirm Withdrawal
+            </button>
+        </form>
+    </main>
+
+    <script>
+        function setAmount(val) {
+            document.querySelector('input[name="amount"]').value = val;
+        }
+    </script>
+</body>
+
+</html>

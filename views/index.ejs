@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fafi2Go | Unlock Your Dreams</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+        }
+
+        .hero-gradient {
+            background: radial-gradient(circle at center, #1e293b 0%, #0b0f1a 100%);
+        }
+
+        .glow-button {
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .glow-button:hover {
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.6);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+
+<body class="text-white hero-gradient min-h-screen flex flex-col">
+
+    <nav class="p-6 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-yellow-500 text-black px-2 py-1 rounded font-black italic">F2G</div>
+            <span class="font-black tracking-tighter uppercase text-xl">Fafi<span
+                    class="text-yellow-500">2</span>Go</span>
+        </div>
+        <a href="/login" class="text-sm font-bold text-slate-400">LOGIN</a>
+    </nav>
+
+    <main class="flex-1 flex flex-col items-center justify-center px-6 text-center">
+
+        <div class="relative mb-8">
+            <div class="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-full"></div>
+            <img src="/static/f2g1.png" alt="Fafi2Go Logo" class="relative w-48 h-48 object-contain mx-auto">
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-black mb-4 leading-tight">
+            UNLOCK YOUR <span class="text-yellow-500">DREAMS</span>.<br>
+            PREDICT & WIN.
+        </h1>
+
+        <p class="text-slate-400 max-w-md mx-auto mb-10 leading-relaxed text-lg">
+            The traditional game you love, powered by modern technology. Turn your dreams into numbers and join the next
+            draw in minutes.
+        </p>
+
+        <a href="/game"
+            class="glow-button bg-yellow-500 text-black font-black py-5 px-10 rounded-2xl text-xl uppercase tracking-widest inline-block">
+            Start Your Fafi Journey
+        </a>
+
+        <div class="grid grid-cols-3 gap-8 mt-16 text-center max-w-lg mx-auto">
+            <div>
+                <i class="fas fa-shield-halved text-yellow-500 text-2xl mb-2"></i>
+                <p class="text-[10px] font-bold uppercase text-slate-500">Provably Fair</p>
+            </div>
+            <div>
+                <i class="fas fa-bolt text-yellow-500 text-2xl mb-2"></i>
+                <p class="text-[10px] font-bold uppercase text-slate-500">Fast Payouts</p>
+            </div>
+            <div>
+                <i class="fas fa-mobile-screen text-yellow-500 text-2xl mb-2"></i>
+                <p class="text-[10px] font-bold uppercase text-slate-500">Play Anywhere</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="p-8 text-center border-t border-slate-800/50">
+        <p class="text-slate-600 text-[10px] uppercase font-bold tracking-widest">
+            Licensed & Secured ● 18+ Gamble Responsibly
+        </p>
+    </footer>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js');
+        }
+    </script>
+</body>
+
+</html>

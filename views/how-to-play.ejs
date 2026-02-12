@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>How to Play | Fafi2Go</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+            color: white;
+        }
+
+        .step-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="pb-24">
+
+    <header class="p-6 flex items-center gap-4 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <a href="/profile" class="text-slate-400"><i class="fas fa-arrow-left text-xl"></i></a>
+        <h1 class="text-xl font-black uppercase tracking-tight">How to Play</h1>
+    </header>
+
+    <main class="px-6 space-y-6">
+
+        <div class="bg-yellow-500 rounded-3xl p-6 text-black relative overflow-hidden">
+            <div class="relative z-10">
+                <h2 class="text-2xl font-black uppercase mb-2">Fafi Mo China</h2>
+                <p class="text-sm font-bold opacity-80 leading-relaxed">
+                    Bet on your dreams! Fafi is a game of chance where you interpret your dreams into numbers and bet on
+                    them.
+                </p>
+            </div>
+            <div class="absolute -right-6 -bottom-6 text-9xl opacity-10 rotate-12">
+                <i class="fas fa-dice"></i>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-xs font-bold text-slate-500 uppercase ml-2 tracking-widest">The Basics</h3>
+
+            <div class="step-card p-5 rounded-2xl flex gap-4">
+                <div
+                    class="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center shrink-0 font-black text-lg">
+                    1</div>
+                <div>
+                    <h4 class="font-bold text-sm mb-1">Pick a Number</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Choose a number from 1 to 36. Each number is
+                        associated with a symbol (like "King", "Snake", "Dead Man").</p>
+                </div>
+            </div>
+
+            <div class="step-card p-5 rounded-2xl flex gap-4">
+                <div
+                    class="w-10 h-10 bg-purple-500/10 text-purple-500 rounded-full flex items-center justify-center shrink-0 font-black text-lg">
+                    2</div>
+                <div>
+                    <h4 class="font-bold text-sm mb-1">Place Your Bet</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Enter your stake amount. The more you bet, the
+                        more you can win. Minimum bet is R10.</p>
+                </div>
+            </div>
+
+            <div class="step-card p-5 rounded-2xl flex gap-4">
+                <div
+                    class="w-10 h-10 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center shrink-0 font-black text-lg">
+                    3</div>
+                <div>
+                    <h4 class="font-bold text-sm mb-1">Wait for the Draw</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Draws happen every 30 minutes. If your number is
+                        picked, you win 28x your bet!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 text-center">
+            <h3 class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-widest">Winning Example</h3>
+            <div class="flex items-center justify-center gap-4 mb-4">
+                <div class="text-right">
+                    <p class="text-[10px] text-slate-500 uppercase">Bet</p>
+                    <p class="text-xl font-black text-white">R10</p>
+                </div>
+                <i class="fas fa-arrow-right text-slate-600"></i>
+                <div class="text-left">
+                    <p class="text-[10px] text-slate-500 uppercase">Win</p>
+                    <p class="text-xl font-black text-yellow-500">R280</p>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-400">
+                Pays <span class="text-white font-bold">28:1</span> on singular numbers.
+            </p>
+        </div>
+
+        <a href="/game"
+            class="block w-full bg-yellow-500 text-black font-black py-4 rounded-xl text-center shadow-lg shadow-yellow-500/20 active:scale-95 transition-transform uppercase tracking-widest">
+            Start Playing
+        </a>
+
+    </main>
+
+</body>
+
+</html>
