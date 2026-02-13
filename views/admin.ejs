@@ -140,6 +140,69 @@
             </div>
         </div>
 
+        <!-- Pending Withdrawals -->
+        <h2 class="section-header">Pending Withdrawals</h2>
+        <div class="overflow-x-auto text-sm text-slate-300">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Details</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (!pendingWithdrawals || pendingWithdrawals.length===0) { %>
+                        <tr>
+                            <td colspan="4" class="text-center text-slate-500 py-4">No pending withdrawals</td>
+                        </tr>
+                        <% } else { %>
+                            <% pendingWithdrawals.forEach(tx=> { %>
+                                <tr>
+                                    <td class="font-bold text-white">
+                                        <%= tx.userId ? tx.userId.firstName : 'Unknown' %>
+                                    </td>
+                                    <td class="font-mono text-red-400">R <%= tx.amount.toFixed(2) %>
+                                    </td>
+                                    <td class="text-xs">
+                                        <% if (tx.withdrawalDetails && tx.withdrawalDetails.method==='bank' ) { %>
+                                            <span class="block font-bold text-white">
+                                                <%= tx.withdrawalDetails.bankName %>
+                                            </span>
+                                            <span class="block text-slate-400">
+                                                <%= tx.withdrawalDetails.accountNumber %>
+                                            </span>
+                                            <% } else if (tx.withdrawalDetails) { %>
+                                                <span class="block font-bold text-white">Crypto (Stellar)</span>
+                                                <span class="font-mono text-[10px] text-slate-400">
+                                                    <%= tx.withdrawalDetails.cryptoAddress %>
+                                                </span>
+                                                <% } else { %>
+                                                    <%= tx.description %>
+                                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="flex gap-2">
+                                            <form action="/admin/withdraw/approve" method="POST">
+                                                <input type="hidden" name="transactionId" value="<%= tx._id %>">
+                                                <button type="submit"
+                                                    class="action-btn btn-approve text-xs">PAY</button>
+                                            </form>
+                                            <form action="/admin/withdraw/reject" method="POST">
+                                                <input type="hidden" name="transactionId" value="<%= tx._id %>">
+                                                <button type="submit"
+                                                    class="action-btn btn-cancel text-xs">REJECT</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
         <!-- Pending Deposits -->
         <h2 class="section-header">Pending Deposits (Yoco)</h2>
         <div class="overflow-x-auto">

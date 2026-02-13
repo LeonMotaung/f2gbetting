@@ -29,6 +29,14 @@ const TransactionSchema = new mongoose.Schema({
     },
     yocoId: {
         type: String
+    },
+    withdrawalDetails: {
+        method: { type: String, enum: ['bank', 'crypto'] },
+        bankName: String,
+        accountNumber: String,
+        accountHolder: String,
+        cryptoAddress: String,
+        network: String
     }
 });
 

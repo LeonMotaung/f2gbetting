@@ -26,6 +26,12 @@ const GameRoundSchema = new mongoose.Schema({
     },
     winningNumber: {
         type: Number
+    },
+    winningLedgerSequence: {
+        type: Number
+    },
+    winningLedgerHash: {
+        type: String
     }
 });
 

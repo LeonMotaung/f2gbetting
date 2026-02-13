@@ -329,11 +329,14 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    showModal(true, "Bet Placed!", data.message);
                     // Update Wallet Display
                     document.querySelector('.font-mono').innerText = `R ${data.newBalance.toFixed(2)}`;
                     togglePanel(false);
                     fetchOdds();
+
+                    // Show Daily Draw Confirmation
+                    showModal(true, "Bet Placed!", data.message + "\n\nResults will be announced at 17:00 when the Stellar Ledger closes.");
+
                 } else {
                     showModal(false, "Bet Failed", data.error || "Could not place bet.");
                 }

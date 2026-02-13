@@ -336,11 +336,131 @@ app.get('/withdraw', ensureAuthenticated, (req, res) => {
     res.render('withdraw', { user: req.session.user });
 });
 
-app.get('/how-to-play', ensureAuthenticated, (req, res) => {
-    res.render('how-to-play');
+app.post('/withdraw', ensureAuthenticated, async (req, res) => {
+    try {
+        const { amount, method, bankName, accountHolder, accountNumber, cryptoAddress, network } = req.body;
+        const withdrawAmount = parseFloat(amount);
+
+        // Validation
+        if (!withdrawAmount || withdrawAmount < 50) {
+            return res.redirect('/withdraw?error=Minimum withdrawal is R50');
+        }
+
+        const user = await User.findById(req.session.user._id);
+        if (user.walletBalance < withdrawAmount) {
+            return res.redirect('/withdraw?error=Insufficient funds');
+        }
+
+        // Deduct Balance
+        user.walletBalance -= withdrawAmount;
+        await user.save();
+        req.session.user = user; // Update session
+
+        // Create Transaction
+        const transaction = new Transaction({
+            userId: user._id,
+            type: 'withdrawal',
+            amount: withdrawAmount,
+            status: 'pending',
+            description: method === 'bank'
+                ? `Withdrawal to ${bankName.toUpperCase()} (${accountNumber})`
+                : `Withdrawal to Crypto (${cryptoAddress.substring(0, 6)}...)`,
+            withdrawalDetails: {
+                method,
+                bankName: method === 'bank' ? bankName : undefined,
+                accountNumber: method === 'bank' ? accountNumber : undefined,
+                accountHolder: method === 'bank' ? accountHolder : undefined,
+                cryptoAddress: method === 'crypto' ? cryptoAddress : undefined,
+                network: method === 'crypto' ? network : undefined
+            }
+        });
+        await transaction.save();
+
+        res.redirect('/wallet?message=Withdrawal Request Submitted');
+
+    } catch (err) {
+        console.error("Withdrawal Error:", err);
+        res.redirect('/withdraw?error=Server Error');
+    }
 });
 
 const GameRound = require('./models/GameRound');
+const NumberStats = require('./models/NumberStats');
+
+// ESI Risk Management Logic
+async function ensureNumberStats() {
+    const count = await NumberStats.countDocuments();
+    if (count < 52) {
+        console.log("Initializing ESI Stats for 52 numbers...");
+        for (let i = 1; i <= 52; i++) {
+            await NumberStats.updateOne(
+                { number: i },
+                { $setOnInsert: { number: i, esi: 1.0, currentPayoutMultiplier: 28.0 } },
+                { upsert: true }
+            );
+        }
+    }
+}
+ensureNumberStats(); // Run on startup
+
+async function updateESI(winningNumber) {
+    const GAMMA = 0.8;
+    const P_INF = 28.0;
+
+    // 1. Fetch all number stats
+    const stats = await NumberStats.find();
+
+    for (let stat of stats) {
+        // Core ESI Algorithm
+        // P_{t+1} = P_t + gamma * (1 - 1/ESI) * (P_inf - P_t) + epsilon
+        // Simplified: Volatility Adjustment
+
+        if (stat.number === winningNumber) {
+            // Winner: ESI Increases (Resistance builds)
+            // If it wins, it becomes "Hot", ESI goes UP.
+            stat.esi = Math.min(stat.esi + 1.5, 15); // Cap at 15
+            stat.lastWinDate = new Date();
+        } else {
+            // Loser: ESI Decays slowly back to 1
+            stat.esi = Math.max(stat.esi - 0.1, 1.0);
+        }
+
+        // Calculate New Payout Limit (P_{t+1})
+        // If ESI is HIGH, term (1 - 1/ESI) -> 0.9. P moves towards P_inf FAST?
+        // Wait, user says: "High ESI ... resistance to limit increases".
+        // Let's interpret: Payout Limit drops if it's hot?
+        // Actually, let's strictly follow the formula given:
+        // P_next = P_curr + 0.8 * (1 - 1/ESI) * (28 - P_curr)
+        // If ESI=1 (Low Risk), (1-1) = 0. P stays at P_curr.
+        // If ESI=10 (High Risk), (1-0.1) = 0.9. P moves 72% of the way to 28?
+        // This formula implies P_t converges to 28.
+        // We need an event to knock P_t AWAY from 28.
+
+        // Let's add the "Shock" logic:
+        // If a number wins, we drop its Payout Multiplier to protect house (e.g. to 20x).
+        // Then ESI helps it recover back to 28x.
+
+        if (stat.number === winningNumber) {
+            // Shock: Drop payout immediately on win
+            stat.currentPayoutMultiplier = Math.max(stat.currentPayoutMultiplier - 5.0, 10.0);
+        }
+
+        // Recovery (The Formula) is applied every round
+        const stabilizationFactor = 1 - (1 / stat.esi);
+        const delta = GAMMA * stabilizationFactor * (P_INF - stat.currentPayoutMultiplier);
+
+        // Add minimal noise epsilon (-0.1 to 0.1)
+        const epsilon = (Math.random() * 0.2) - 0.1;
+
+        stat.currentPayoutMultiplier += delta + epsilon;
+
+        // Clamp result
+        stat.currentPayoutMultiplier = Math.min(Math.max(stat.currentPayoutMultiplier, 10), 35);
+
+        await stat.save();
+    }
+    console.log(`Updated ESI stats. Winner #${winningNumber} ESI: ${stats.find(s => s.number === winningNumber).esi.toFixed(2)}`);
+}
 
 // Helper to get or create active round
 async function getActiveRound() {
@@ -363,27 +483,28 @@ app.get('/api/odds', async (req, res) => {
     try {
         const round = await getActiveRound();
         const odds = {};
-        const baseOdds = 28;
 
-        for (let i = 1; i <= 36; i++) {
-            const totalBetOnNumber = round.bets.get(i.toString()) || 0;
-            // DYNAMIC ODDS LOGIC:
-            // Base Odds = 28
-            // Decrease factor = 1 + (TotalBet / 1000)
-            // Example: R0 bet = 28 / 1 = 28x
-            // Example: R1000 bet = 28 / 2 = 14x
-            // Example: R5000 bet = 28 / 6 = 4.6x
-            let calculatedOdds = baseOdds / (1 + (totalBetOnNumber / 1000));
-            // Minimum odds clamp
-            if (calculatedOdds < 1.5) calculatedOdds = 1.5;
+        // Fetch Dynamic ESI Stats
+        const stats = await NumberStats.find();
 
-            odds[i] = parseFloat(calculatedOdds.toFixed(2));
+        // Map stats to odds object
+        // If stats are missing for some reason, default to 28.0
+        for (let i = 1; i <= 52; i++) {
+            const stat = stats.find(s => s.number === i);
+            let multiplier = stat ? stat.currentPayoutMultiplier : 28.0;
+
+            // Optional: Adjust slightly based on CURRENT round bets too?
+            // "The user says: odds are fair somehow they will be the same and different"
+            // Let's stick to the ESI multiplier as the primary source.
+
+            odds[i] = parseFloat(multiplier.toFixed(2));
         }
 
         res.json({
             roundId: round.roundId,
             odds: odds,
-            startTime: round.startTime
+            startTime: round.startTime,
+            endTime: round.endTime
         });
     } catch (err) {
         console.error(err);
@@ -391,9 +512,45 @@ app.get('/api/odds', async (req, res) => {
     }
 });
 
-// API to place bet
+// Stellar Helper
+const StellarSdk = require('stellar-sdk');
+const server = new StellarSdk.Horizon.Server('https://horizon.stellar.org');
+
+async function getNextLedgerHash() {
+    try {
+        // Get latest ledger
+        const latest = await server.ledgers().order('desc').limit(1).call();
+        const latestSequence = latest.records[0].sequence;
+        const targetSequence = latestSequence + 1;
+
+        console.log(`Waiting for Stellar Ledger #${targetSequence}...`);
+
+        // Poll for the next ledger (Simple polling)
+        // In production, use Streaming: server.ledgers().cursor('now').stream(...)
+        let hash = null;
+        let attempts = 0;
+        while (!hash && attempts < 20) { // Max 20 * 1s = 20s
+            try {
+                const ledger = await server.ledgers().ledger(targetSequence).call();
+                hash = ledger.hash;
+            } catch (e) {
+                // Ledger not closed yet, wait 1s
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                attempts++;
+            }
+        }
+
+        if (!hash) throw new Error("Timeout waiting for Stellar ledger");
+        return { sequence: targetSequence, hash };
+    } catch (err) {
+        console.error("Stellar Error:", err);
+        throw err;
+    }
+}
+
+// API to place bet (DAILY DRAW MODE)
 app.post('/bet', ensureAuthenticated, async (req, res) => {
-    console.log("Processing bet request..."); // Debug log to ensure reload
+    console.log("Processing bet request (Daily Draw)...");
     const { number, amount } = req.body;
 
     if (!number || !amount || amount <= 0) {
@@ -406,19 +563,26 @@ app.post('/bet', ensureAuthenticated, async (req, res) => {
             return res.status(400).json({ error: 'Insufficient funds' });
         }
 
-        // Deduct from wallet
+        // 1. Deduct from wallet upfront
         user.walletBalance -= amount;
         user.totalBets = (user.totalBets || 0) + 1;
         await user.save();
-        req.session.user = user; // Update session
+        req.session.user = user;
 
-        // Update Game Round
+        // 2. Add to Active Round
         const round = await getActiveRound();
+
+        // Prevent betting if round is "processing" (past 17:00 but not resolved)
+        // Simple check: if status != active
+        if (round.status !== 'active') {
+            return res.status(400).json({ success: false, error: "Round is currently resolving. Please wait a moment." });
+        }
+
         const currentBet = round.bets.get(number.toString()) || 0;
         round.bets.set(number.toString(), currentBet + amount);
         await round.save();
 
-        // Record Transaction
+        // 3. Record Transaction
         const transaction = new Transaction({
             userId: user._id,
             type: 'bet',
@@ -428,15 +592,10 @@ app.post('/bet', ensureAuthenticated, async (req, res) => {
         });
         await transaction.save();
 
-        // Calculate current odds for this number
-        const totalBetOnNumber = round.bets.get(number.toString());
-        const newOdds = (28 / (1 + (totalBetOnNumber / 1000))).toFixed(2);
-
         res.json({
             success: true,
             newBalance: user.walletBalance,
-            newOdds: newOdds,
-            message: `Bet placed on #${number}!`
+            message: `Bet placed on #${number} for the 17:00 Daily Draw.`
         });
 
     } catch (err) {
@@ -444,6 +603,112 @@ app.post('/bet', ensureAuthenticated, async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
+
+// Scheduler (Daily Draw Resolution)
+setInterval(async () => {
+    // Check if it's 17:00 or current round has expired
+    const round = await GameRound.findOne({ status: 'active' });
+    // Check if round exists and end time passed
+    if (round && round.endTime && new Date() > round.endTime) {
+        resolveDailyDraw(round);
+    }
+}, 60 * 1000); // Check every minute
+
+let processingDraw = false;
+
+async function resolveDailyDraw(round) {
+    if (processingDraw) return;
+    processingDraw = true;
+
+    try {
+        console.log(`Resolving Round ${round.roundId}...`);
+
+        // 1. Get Stellar Ledger Hash
+        const { sequence, hash } = await getNextLedgerHash();
+
+        // 2. Determine Winning Number
+        const hex = hash.slice(-8);
+        const decimal = parseInt(hex, 16);
+        const winningNumber = (decimal % 52) + 1;
+
+        console.log(`Winning Number: ${winningNumber} (Ledger #${sequence})`);
+
+        // 3. Update Round
+        round.winningNumber = winningNumber;
+        round.winningLedgerSequence = sequence;
+        round.winningLedgerHash = hash;
+        round.status = 'completed';
+        await round.save();
+
+        // 4. Payout Winners
+        const winPattern = new RegExp(`Bet on #${winningNumber}$`);
+        const winningBets = await Transaction.find({
+            type: 'bet',
+            date: { $gte: round.startTime, $lte: new Date() },
+            description: { $regex: winPattern }
+        }).populate('userId');
+
+        // Odds: Fetch dynamic odds
+        const stat = await NumberStats.findOne({ number: winningNumber });
+        const odds = stat ? stat.currentPayoutMultiplier : 28.0; // Default 28 used if no stats
+
+        console.log(`Winners: ${winningBets.length}. Payout Multiplier: ${odds.toFixed(2)}x`);
+
+        for (const betTx of winningBets) {
+            const user = betTx.userId;
+            if (!user) continue;
+
+            const winAmount = betTx.amount * odds;
+
+            // Create Win Transaction
+            const winTx = new Transaction({
+                userId: user._id,
+                type: 'win',
+                amount: winAmount,
+                description: `Win on #${winningNumber} (Draw ${round.roundId})`,
+                status: 'completed',
+                yocoId: hash
+            });
+            await winTx.save();
+
+            // Update Wallet
+            await User.findByIdAndUpdate(user._id, {
+                $inc: {
+                    walletBalance: winAmount,
+                    totalWins: 1,
+                    totalWonAmount: winAmount
+                }
+            });
+        }
+
+        // 5. Update ESI Stats
+        await updateESI(winningNumber);
+
+        // 6. Create NEXT Round
+        const now = new Date();
+        let targetEnd = new Date();
+        targetEnd.setHours(17, 0, 0, 0);
+        // If it's already past 17:00 today (which it is if we are resolving), target is tomorrow
+        if (now >= targetEnd) {
+            targetEnd.setDate(targetEnd.getDate() + 1);
+        }
+
+        const newRound = new GameRound({
+            roundId: Date.now().toString(),
+            startTime: new Date(),
+            endTime: targetEnd,
+            status: 'active',
+            bets: {}
+        });
+        await newRound.save();
+        console.log(`New Round Started. Ends: ${targetEnd}`);
+
+    } catch (e) {
+        console.error("Daily Draw Error:", e);
+    } finally {
+        processingDraw = false;
+    }
+}
 
 app.get('/results', ensureAuthenticated, async (req, res) => {
     try {

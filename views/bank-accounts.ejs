@@ -50,28 +50,36 @@
             <% } else { %>
                 <div class="space-y-1">
                     <% transactions.forEach(transaction=> { %>
-                        <div class="transaction-item py-4 flex justify-between items-center">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 <%= transaction.type === 'deposit' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500' %> rounded-full flex items-center justify-center">
-                                    <i
-                                        class="fas <%= transaction.type === 'deposit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
+                        <% let colorClass='text-slate-500 bg-slate-500/10' ; let iconClass='fa-circle' ; let
+                            amountColor='text-slate-300' ; let sign='-' ; if (transaction.type==='deposit' ) {
+                            colorClass='text-green-500 bg-green-500/10' ; iconClass='fa-arrow-down' ;
+                            amountColor='text-green-400' ; sign='+' ; } else if (transaction.type==='withdrawal' ) {
+                            colorClass='text-yellow-500 bg-yellow-500/10' ; // User requested Yellow
+                            iconClass='fa-arrow-up' ; amountColor='text-yellow-500' ; sign='-' ; } else if
+                            (transaction.type==='win' ) { colorClass='text-purple-500 bg-purple-500/10' ;
+                            iconClass='fa-trophy' ; amountColor='text-purple-400' ; sign='+' ; } else if
+                            (transaction.type==='bet' ) { colorClass='text-red-500 bg-red-500/10' ;
+                            iconClass='fa-ticket-alt' ; amountColor='text-red-400' ; sign='-' ; } %>
+                            <div class="transaction-item py-4 flex justify-between items-center">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 <%= colorClass %> rounded-full flex items-center justify-center">
+                                        <i class="fas <%= iconClass %>"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm capitalize text-white">
+                                            <%= transaction.description || transaction.type %>
+                                        </p>
+                                        <p class="text-[10px] text-slate-500">
+                                            <%= new Date(transaction.date).toLocaleString() %>
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-bold text-sm capitalize">
-                                        <%= transaction.type %>
-                                    </p>
-                                    <p class="text-[10px] text-slate-500">
-                                        <%= new Date(transaction.date).toLocaleString() %>
-                                    </p>
-                                </div>
+                                <span class="font-black <%= amountColor %>">
+                                    <%= sign %> R <%= transaction.amount.toFixed(2) %>
+                                </span>
                             </div>
-                            <span
-                                class="font-black <%= transaction.type === 'deposit' ? 'text-green-400' : 'text-slate-300' %>">
-                                <%= transaction.type==='deposit' ? '+' : '-' %> R <%= transaction.amount.toFixed(2) %>
-                            </span>
-                        </div>
-                        <% }) %>
+                            <% }) %>
                 </div>
                 <% } %>
 

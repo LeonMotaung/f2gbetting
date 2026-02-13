@@ -44,56 +44,90 @@
         <div class="bg-slate-900/50 rounded-3xl p-6 border border-slate-800 mb-8 flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-500 uppercase">Available for Withdrawal</p>
-                <h2 class="text-2xl font-black text-white">R 1,250.00</h2>
+                <h2 class="text-2xl font-black text-white">R <%= user.walletBalance ? user.walletBalance.toFixed(2)
+                        : '0.00' %>
+                </h2>
             </div>
             <i class="fas fa-wallet text-yellow-500/20 text-4xl"></i>
         </div>
 
-        <form action="#" method="POST" class="space-y-6">
+        <!-- Tabs -->
+        <div class="flex bg-slate-800 p-1 rounded-2xl mb-6">
+            <button onclick="switchTab('bank')" id="tab-bank"
+                class="flex-1 py-3 text-xs font-black uppercase rounded-xl bg-yellow-500 text-slate-900 shadow-lg transition-all">Bank
+                Transfer</button>
+            <button onclick="switchTab('crypto')" id="tab-crypto"
+                class="flex-1 py-3 text-xs font-black uppercase rounded-xl text-slate-400 hover:text-white transition-all">Crypto
+                Wallet</button>
+        </div>
+
+        <form action="/withdraw" method="POST" class="space-y-6">
+            <input type="hidden" name="method" id="withdraw-method" value="bank">
 
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Amount to Withdraw
                     (ZAR)</label>
                 <div class="relative">
                     <span class="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-yellow-500">R</span>
-                    <input type="number" name="amount" placeholder="0.00"
-                        class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 pl-12 text-2xl font-black outline-none transition-all input-focus">
+                    <input type="number" name="amount" placeholder="0.00" required step="0.01" min="50"
+                        class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 pl-12 text-2xl font-black outline-none transition-all input-focus text-white">
                 </div>
                 <div class="flex gap-2 mt-3">
                     <button type="button" onclick="setAmount(100)"
                         class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">R100</button>
                     <button type="button" onclick="setAmount(500)"
                         class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">R500</button>
-                    <button type="button" onclick="setAmount(1250)"
+                    <button type="button" onclick="setAmount(<%= user.walletBalance %>)"
                         class="flex-1 bg-slate-800 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition-colors">MAX</button>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Send To</label>
-                <div class="bank-pill rounded-2xl p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center">
-                            <i class="fas fa-university text-slate-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold">Standard Bank</p>
-                            <p class="text-[10px] text-slate-500">Savings Account •••• 4821</p>
-                        </div>
-                    </div>
-                    <button type="button" class="text-yellow-500 text-[10px] font-black uppercase">Change</button>
+            <!-- Bank Details Section -->
+            <div id="section-bank" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Select Bank</label>
+                    <select name="bankName"
+                        class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-white font-bold outline-none input-focus appearance-none">
+                        <option value="capitec">Capitec Bank</option>
+                        <option value="fnb">FNB</option>
+                        <option value="tymebank">TymeBank</option>
+                        <option value="nedbank">Nedbank</option>
+                        <option value="standard">Standard Bank</option>
+                        <option value="rmb">RMB</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Account Holder</label>
+                    <input type="text" name="accountHolder" placeholder="e.g. J Doe"
+                        class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-white font-bold outline-none input-focus">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Account Number</label>
+                    <input type="text" name="accountNumber" placeholder="e.g. 1234567890"
+                        class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-white font-bold outline-none input-focus">
                 </div>
             </div>
 
-            <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl flex gap-3">
-                <i class="fas fa-info-circle text-blue-400 mt-1"></i>
-                <p class="text-[11px] text-blue-200 leading-tight">
-                    Withdrawals are processed within 24 hours. Minimum withdrawal is R50.00.
-                </p>
+            <!-- Crypto Details Section -->
+            <div id="section-crypto" class="space-y-4 hidden">
+                <div class="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-2xl flex gap-3">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mt-1"></i>
+                    <p class="text-[11px] text-yellow-200 leading-tight">
+                        Ensure you enter the correct <strong>Stellar (XLM)</strong> address. Incorrect addresses result
+                        in lost funds.
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Stellar Wallet
+                        Address</label>
+                    <input type="text" name="cryptoAddress" placeholder="G..."
+                        class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-white font-mono text-sm outline-none input-focus">
+                </div>
+                <input type="hidden" name="network" value="Stellar">
             </div>
 
             <button type="submit"
-                class="w-full bg-yellow-500 text-black font-black py-5 rounded-2xl text-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-transform uppercase tracking-widest">
+                class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl text-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-transform uppercase tracking-widest mt-8">
                 Confirm Withdrawal
             </button>
         </form>
@@ -101,7 +135,52 @@
 
     <script>
         function setAmount(val) {
-            document.querySelector('input[name="amount"]').value = val;
+            document.querySelector('input[name="amount"]').value = val.toFixed(2);
+        }
+
+        function switchTab(tab) {
+            const bankTab = document.getElementById('tab-bank');
+            const cryptoTab = document.getElementById('tab-crypto');
+            const bankSection = document.getElementById('section-bank');
+            const cryptoSection = document.getElementById('section-crypto');
+            const methodInput = document.getElementById('withdraw-method');
+
+            if (tab === 'bank') {
+                bankTab.classList.add('bg-yellow-500', 'text-slate-900', 'shadow-lg');
+                bankTab.classList.remove('text-slate-400');
+
+                cryptoTab.classList.remove('bg-yellow-500', 'text-slate-900', 'shadow-lg');
+                cryptoTab.classList.add('text-slate-400');
+
+                bankSection.classList.remove('hidden');
+                cryptoSection.classList.add('hidden');
+
+                methodInput.value = 'bank';
+
+                // Toggle required fields
+                document.querySelector('select[name="bankName"]').required = true;
+                document.querySelector('input[name="accountHolder"]').required = true;
+                document.querySelector('input[name="accountNumber"]').required = true;
+                document.querySelector('input[name="cryptoAddress"]').required = false;
+
+            } else {
+                cryptoTab.classList.add('bg-yellow-500', 'text-slate-900', 'shadow-lg');
+                cryptoTab.classList.remove('text-slate-400');
+
+                bankTab.classList.remove('bg-yellow-500', 'text-slate-900', 'shadow-lg');
+                bankTab.classList.add('text-slate-400');
+
+                cryptoSection.classList.remove('hidden');
+                bankSection.classList.add('hidden');
+
+                methodInput.value = 'crypto';
+
+                // Toggle required fields
+                document.querySelector('select[name="bankName"]').required = false;
+                document.querySelector('input[name="accountHolder"]').required = false;
+                document.querySelector('input[name="accountNumber"]').required = false;
+                document.querySelector('input[name="cryptoAddress"]').required = true;
+            }
         }
     </script>
 </body>
