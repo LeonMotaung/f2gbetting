@@ -227,9 +227,10 @@
                 // REAL ODDS LOGIC
                 const odds = currentOdds[item.n] || 28.00; // Default to 28x if not found
 
-                // Calculate simulated popularity for visual bar (inverse of odds)
-                // Base 28. If odds 28 -> 0% pop. If odds 1.5 -> 100% pop.
-                const popularity = Math.max(0, Math.min(100, ((28 - odds) / 26.5) * 100));
+                // Bar represents Odds Potential (Shrinks as odds drop/people bet)
+                // Range: 1.0x to 28.0x
+                const oddsPercent = Math.max(0, Math.min(100, ((odds - 1.0) / 27.0) * 100));
+                const isHot = odds < 25.0; // Considered active/hot if dropping
 
                 const card = document.createElement('div');
                 card.className = "number-card glass p-5 rounded-3xl border border-slate-700 cursor-pointer hover:border-yellow-500 group";
@@ -240,16 +241,16 @@
                         <div class="text-5xl font-black text-slate-700 group-hover:text-yellow-500/20 transition-colors">#${item.n}</div>
                         <div class="text-right">
                             <span class="text-[10px] font-bold text-slate-500 block">LIVE ODDS</span>
-                            <span class="text-lg font-black text-green-400">${odds.toFixed(2)}x</span>
+                            <span class="text-lg font-black ${isHot ? 'text-yellow-500' : 'text-green-400'} transition-colors">${odds.toFixed(2)}x</span>
                         </div>
                     </div>
                     <h3 class="text-xl font-black text-white uppercase group-hover:text-yellow-500">${item.title}</h3>
                     <p class="text-slate-400 text-xs mt-2 italic leading-tight">${item.tags.join(", ")}</p>
                     <div class="mt-4 flex items-center gap-2">
                          <div class="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-yellow-500" style="width: ${popularity}%"></div>
+                            <div class="h-full bg-yellow-500 transition-all duration-1000" style="width: ${oddsPercent}%"></div>
                          </div>
-                         <i class="fas fa-fire ${popularity > 50 ? 'hot-odds' : 'text-slate-700'} text-[10px]"></i>
+                         <i class="fas fa-fire ${isHot ? 'hot-odds' : 'text-slate-700'} text-[10px]"></i>
                     </div>
                 `;
                 grid.appendChild(card);

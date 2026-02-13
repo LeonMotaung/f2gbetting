@@ -58,7 +58,18 @@ const UserSchema = new mongoose.Schema({
     totalWonAmount: {
         type: Number,
         default: 0
-    }
+    },
+    verificationStatus: {
+        type: String,
+        enum: ['unverified', 'pending', 'verified', 'rejected'],
+        default: 'unverified'
+    },
+    documents: {
+        idFront: String,
+        idBack: String,
+        proofOfAddress: String
+    },
+    rejectionReason: String
 });
 
 // Hash password before saving

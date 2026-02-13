@@ -582,7 +582,18 @@ app.post('/bet', ensureAuthenticated, async (req, res) => {
         round.bets.set(number.toString(), currentBet + amount);
         await round.save();
 
-        // 3. Record Transaction
+        // 3. Dynamic Odds Adjustment (Supply/Demand)
+        // Decrease multiplier slightly based on bet volume
+        const stat = await NumberStats.findOne({ number: number });
+        if (stat) {
+            // Decrease factor: 0.05x drop for every R100 bet? 
+            // = 0.0005 per rand.
+            const drop = amount * 0.0005;
+            stat.currentPayoutMultiplier = Math.max(stat.currentPayoutMultiplier - drop, 1.5);
+            await stat.save();
+        }
+
+        // 4. Record Transaction
         const transaction = new Transaction({
             userId: user._id,
             type: 'bet',
@@ -595,7 +606,7 @@ app.post('/bet', ensureAuthenticated, async (req, res) => {
         res.json({
             success: true,
             newBalance: user.walletBalance,
-            message: `Bet placed on #${number} for the 17:00 Daily Draw.`
+            message: `Bet placed on #${number} for the 17:00 Daily Draw.\nOdds adjusted to ${stat ? stat.currentPayoutMultiplier.toFixed(2) : '28.00'}x`
         });
 
     } catch (err) {
@@ -709,6 +720,46 @@ async function resolveDailyDraw(round) {
         processingDraw = false;
     }
 }
+
+// Replaced duplicate Multer block with nothing.
+
+// Verification Routes
+app.get('/verify', ensureAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user._id);
+        res.render('verify', { user });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/profile');
+    }
+});
+
+app.post('/verify', ensureAuthenticated, upload.fields([
+    { name: 'idFront', maxCount: 1 },
+    { name: 'idBack', maxCount: 1 },
+    { name: 'proofOfAddress', maxCount: 1 }
+]), async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user._id);
+
+        // Save file paths relative to root (or just filename if serving static)
+        if (req.files.idFront) user.documents.idFront = req.files.idFront[0].path;
+        if (req.files.idBack) user.documents.idBack = req.files.idBack[0].path;
+        if (req.files.proofOfAddress) user.documents.proofOfAddress = req.files.proofOfAddress[0].path;
+
+        user.verificationStatus = 'pending';
+        user.rejectionReason = undefined; // Clear previous rejection
+
+        await user.save();
+        req.session.user = user; // Update session
+
+        res.redirect('/verify?success=true');
+    } catch (err) {
+        console.error("Verification Upload Error:", err);
+        res.redirect('/verify?error=Upload failed');
+    }
+});
+
 
 app.get('/results', ensureAuthenticated, async (req, res) => {
     try {

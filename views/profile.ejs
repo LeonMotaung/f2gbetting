@@ -108,34 +108,56 @@
         <div class="space-y-3">
             <h3 class="text-xs font-bold text-slate-600 uppercase ml-2 tracking-widest">Account Settings</h3>
 
-            <a href="/edit-profile" class="menu-item p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center"><i
-                            class="fas fa-user-edit"></i></div>
-                    <span class="text-sm font-bold">Edit Profile Info</span>
-                </div>
-                <i class="fas fa-chevron-right text-slate-700"></i>
-            </a>
-
-            <a href="/bank-accounts" class="menu-item p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-yellow-500/10 text-yellow-500 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-university"></i>
+            <% if (user.verificationStatus !=='verified' ) { %>
+                <a href="/verify"
+                    class="menu-item p-4 rounded-2xl flex items-center justify-between border-l-4 <%= user.verificationStatus === 'pending' ? 'border-l-blue-500' : 'border-l-red-500' %>">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-slate-800 text-white rounded-xl flex items-center justify-center">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold block">Verify Identity</span>
+                            <span
+                                class="text-[10px] <%= user.verificationStatus === 'pending' ? 'text-blue-400' : 'text-red-400' %> uppercase font-bold">
+                                <%= user.verificationStatus==='pending' ? 'Pending Review' : 'Action Required' %>
+                            </span>
+                        </div>
                     </div>
-                    <span class="text-sm font-bold">Bank Accounts</span>
-                </div>
-                <i class="fas fa-chevron-right text-slate-700"></i>
-            </a>
+                    <i class="fas fa-chevron-right text-slate-700"></i>
+                </a>
+                <% } %>
 
-            <a href="#" class="menu-item p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <span class="text-sm font-bold">Security & 2FA</span>
-                </div>
-                <i class="fas fa-chevron-right text-slate-700"></i>
-            </a>
+                    <a href="/edit-profile" class="menu-item p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-user-edit"></i></div>
+                            <span class="text-sm font-bold">Edit Profile Info</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-700"></i>
+                    </a>
+
+                    <a href="/bank-accounts" class="menu-item p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 bg-yellow-500/10 text-yellow-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <span class="text-sm font-bold">Bank Accounts</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-700"></i>
+                    </a>
+
+                    <a href="#" class="menu-item p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <span class="text-sm font-bold">Security & 2FA</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-700"></i>
+                    </a>
         </div>
 
         <div class="space-y-3 pt-2">

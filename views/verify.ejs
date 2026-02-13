@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Identity | Fafi2Go</title>
+    <link rel="icon" type="image/png" href="/static/f2g.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0b0f1a;
+            color: white;
+        }
+
+        .upload-box {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .upload-box:hover {
+            border-color: #eab308;
+            background: rgba(234, 179, 8, 0.05);
+        }
+    </style>
+</head>
+
+<body class="pb-24">
+
+    <header class="p-6 flex items-center gap-4 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <a href="/profile" class="text-slate-400"><i class="fas fa-arrow-left text-xl"></i></a>
+        <h1 class="text-xl font-black uppercase tracking-tight">Verify Identity</h1>
+    </header>
+
+    <main class="px-6 space-y-6">
+
+        <% if (user.verificationStatus==='pending' ) { %>
+            <div class="bg-blue-500/10 border border-blue-500/30 p-6 rounded-2xl text-center">
+                <i class="fas fa-clock text-4xl text-blue-500 mb-4"></i>
+                <h3 class="text-xl font-bold text-blue-400">Verification Pending</h3>
+                <p class="text-slate-400 text-sm mt-2">Your documents are under review. This usually takes 24 hours.</p>
+                <a href="/profile" class="inline-block mt-4 text-blue-400 font-bold text-sm">Back to Profile</a>
+            </div>
+            <% } else if (user.verificationStatus==='verified' ) { %>
+                <div class="bg-green-500/10 border border-green-500/30 p-6 rounded-2xl text-center">
+                    <i class="fas fa-check-circle text-4xl text-green-500 mb-4"></i>
+                    <h3 class="text-xl font-bold text-green-400">Verified</h3>
+                    <p class="text-slate-400 text-sm mt-2">Your account is fully verified.</p>
+                </div>
+                <% } else { %>
+
+                    <% if (user.verificationStatus==='rejected' ) { %>
+                        <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl mb-6">
+                            <p class="text-red-400 font-bold text-sm"><i class="fas fa-exclamation-circle mr-2"></i>
+                                Verification Rejected</p>
+                            <p class="text-slate-300 text-xs mt-1">
+                                <%= user.rejectionReason || "Please ensure documents are clear and valid." %>
+                            </p>
+                        </div>
+                        <% } %>
+
+                            <p class="text-slate-400 text-sm mb-6">To comply with FICA regulations, please upload clear
+                                photos of your ID and Proof of Residence.</p>
+
+                            <form action="/verify" method="POST" enctype="multipart/form-data" class="space-y-6">
+
+                                <!-- ID Front -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 mb-2">ID Document
+                                        (Front)</label>
+                                    <label class="upload-box block rounded-xl p-6 text-center cursor-pointer relative">
+                                        <input type="file" name="idFront" class="hidden" required accept="image/*"
+                                            onchange="previewFile(this, 'preview-front')">
+                                        <div id="content-front">
+                                            <i class="fas fa-id-card text-3xl text-slate-600 mb-2"></i>
+                                            <p class="text-xs text-slate-400 font-bold">Tap to Upload Front</p>
+                                        </div>
+                                        <img id="preview-front"
+                                            class="hidden absolute inset-0 w-full h-full object-cover rounded-xl opacity-50" />
+                                        <div id="check-front"
+                                            class="hidden absolute top-2 right-2 bg-green-500 text-white w-6 h-6 rounded-full items-center justify-center text-xs">
+                                            <i class="fas fa-check"></i></div>
+                                    </label>
+                                </div>
+
+                                <!-- ID Back -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 mb-2">ID Document
+                                        (Back)</label>
+                                    <label class="upload-box block rounded-xl p-6 text-center cursor-pointer relative">
+                                        <input type="file" name="idBack" class="hidden" required accept="image/*"
+                                            onchange="previewFile(this, 'preview-back')">
+                                        <div id="content-back">
+                                            <i class="fas fa-id-card text-3xl text-slate-600 mb-2"></i>
+                                            <p class="text-xs text-slate-400 font-bold">Tap to Upload Back</p>
+                                        </div>
+                                        <img id="preview-back"
+                                            class="hidden absolute inset-0 w-full h-full object-cover rounded-xl opacity-50" />
+                                        <div id="check-back"
+                                            class="hidden absolute top-2 right-2 bg-green-500 text-white w-6 h-6 rounded-full items-center justify-center text-xs">
+                                            <i class="fas fa-check"></i></div>
+                                    </label>
+                                </div>
+
+                                <!-- Proof of Address -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Proof of
+                                        Address / Bank Statement</label>
+                                    <label class="upload-box block rounded-xl p-6 text-center cursor-pointer relative">
+                                        <input type="file" name="proofOfAddress" class="hidden" required
+                                            accept="image/*,application/pdf"
+                                            onchange="previewFile(this, 'preview-poa')">
+                                        <div id="content-poa">
+                                            <i class="fas fa-file-invoice text-3xl text-slate-600 mb-2"></i>
+                                            <p class="text-xs text-slate-400 font-bold">Tap to Upload Proof</p>
+                                        </div>
+                                        <img id="preview-poa"
+                                            class="hidden absolute inset-0 w-full h-full object-cover rounded-xl opacity-50" />
+                                        <div id="check-poa"
+                                            class="hidden absolute top-2 right-2 bg-green-500 text-white w-6 h-6 rounded-full items-center justify-center text-xs">
+                                            <i class="fas fa-check"></i></div>
+                                    </label>
+                                </div>
+
+                                <div class="pt-4">
+                                    <button type="submit"
+                                        class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl shadow-lg shadow-yellow-500/20 active:scale-95 transition-all">
+                                        SUBMIT DOCUMENTS
+                                    </button>
+                                    <p class="text-center text-[10px] text-slate-600 mt-4"><i
+                                            class="fas fa-lock mr-1"></i> Your data is encrypted and secure.</p>
+                                </div>
+
+                            </form>
+                            <% } %>
+
+    </main>
+
+    <script>
+        function previewFile(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const contentId = 'content-' + previewId.split('-')[1]; // e.g., content-front
+            const content = document.getElementById(contentId);
+            const checkId = 'check-' + previewId.split('-')[1];
+            const check = document.getElementById(checkId);
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    check.classList.remove('hidden');
+                    check.classList.add('flex');
+                    // content.classList.add('opacity-0'); 
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
