@@ -114,7 +114,68 @@
             el.querySelector('i').classList.add('text-yellow-500');
             el.querySelector('i').classList.remove('text-slate-400');
             el.querySelector('span').classList.remove('text-slate-400');
+
+            // Set hidden input or state for selected method if needed, 
+            // but for now we check the active class in the submit handler or just assume based on UI.
+            // Actually, let's add a hidden input to the form to track the method.
+            let methodInput = document.querySelector('input[name="method"]');
+            if (!methodInput) {
+                methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = 'method';
+                document.querySelector('form').appendChild(methodInput);
+            }
+            // Determine method based on text content
+            const method = el.querySelector('span').innerText;
+            methodInput.value = method;
         }
+
+        // Initialize default method
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultMethod = document.querySelector('.method-card.active');
+            if (defaultMethod) selectMethod(defaultMethod);
+        });
+
+        document.querySelector('form').addEventListener('submit', async function (e) {
+            const amount = document.querySelector('input[name="amount"]').value;
+            const methodInput = document.querySelector('input[name="method"]');
+            const method = methodInput ? methodInput.value : 'Instant EFT'; // Default
+
+            if (method.includes('Card')) {
+                e.preventDefault(); // Stop normal form submission
+
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerText;
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Processing...';
+
+                try {
+                    const response = await fetch('/api/deposit/yoco', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ amount })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.checkoutUrl) {
+                        window.location.href = data.checkoutUrl;
+                    } else {
+                        alert('Error: ' + (data.error || 'Could not initiate payment'));
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = originalText;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error initiating payment');
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalText;
+                }
+            }
+            // If not Card (e.g. Instant EFT), let the form submit normally (mock handler)
+        });
     </script>
 </body>
 

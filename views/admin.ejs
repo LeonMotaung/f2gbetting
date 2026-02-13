@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F2G Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding-bottom: 6rem;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin: 0.5rem 0;
+        }
+
+        .section-header {
+            margin: 2rem 0 1rem;
+            color: #fbbf24;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        .data-table th {
+            background: #0f172a;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn-approve {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sticky top-0 z-50 glass border-b border-slate-700 p-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-yellow-500 text-slate-900 p-1.5 rounded-lg font-black italic text-xl">F2G</div>
+            <span class="font-black text-xl tracking-tighter uppercase text-slate-200">Admin<span
+                    class="text-yellow-500">Panel</span></span>
+        </div>
+        <a href="/game" class="text-slate-400 hover:text-white"><i class="fas fa-arrow-left mr-1"></i> Back to Game</a>
+    </nav>
+
+    <div class="admin-container">
+        <!-- Stats -->
+        <h2 class="section-header">Daily Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 class="text-slate-400 uppercase text-xs font-bold">Money Played Today</h3>
+                <div class="stat-value">R <%= stats.moneyPlayed.toFixed(2) %>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3 class="text-slate-400 uppercase text-xs font-bold">Money Made Today</h3>
+                <div class="stat-value">R <%= stats.moneyMade.toFixed(2) %>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3 class="text-slate-400 uppercase text-xs font-bold">Total Users</h3>
+                <div class="stat-value">
+                    <%= users.length %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Deposits -->
+        <h2 class="section-header">Pending Deposits (Yoco)</h2>
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (pendingDeposits.length===0) { %>
+                        <tr>
+                            <td colspan="4" class="text-center text-slate-500">No pending deposits</td>
+                        </tr>
+                        <% } else { %>
+                            <% pendingDeposits.forEach(deposit=> { %>
+                                <tr>
+                                    <td>
+                                        <div class="font-bold text-white">
+                                            <%= deposit.userId ? deposit.userId.firstName + ' ' +
+                                                deposit.userId.lastName : 'Unknown' %>
+                                        </div>
+                                        <div class="text-xs text-slate-500">
+                                            <%= deposit.userId ? deposit.userId.email : '' %>
+                                        </div>
+                                    </td>
+                                    <td class="font-mono text-green-400">R <%= deposit.amount.toFixed(2) %>
+                                    </td>
+                                    <td class="text-sm text-slate-400">
+                                        <%= new Date(deposit.date).toLocaleString() %>
+                                    </td>
+                                    <td>
+                                        <form action="/admin/deposit/approve" method="POST">
+                                            <input type="hidden" name="transactionId" value="<%= deposit._id %>">
+                                            <button type="submit" class="action-btn btn-approve">Approve</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Recent Bets -->
+        <h2 class="section-header">Recent Bets</h2>
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% recentBets.forEach(bet=> { %>
+                        <tr>
+                            <td>
+                                <div class="font-bold text-white">
+                                    <%= bet.userId ? bet.userId.firstName + ' ' + bet.userId.lastName : 'Unknown' %>
+                                </div>
+                            </td>
+                            <td class="font-mono text-yellow-500">R <%= bet.amount.toFixed(2) %>
+                            </td>
+                            <td class="text-sm text-slate-300">
+                                <%= bet.description %>
+                            </td>
+                            <td class="text-sm text-slate-400">
+                                <%= new Date(bet.date).toLocaleString() %>
+                            </td>
+                            <td>
+                                <% if (bet.status !=='cancelled' ) { %>
+                                    <form action="/admin/bet/cancel" method="POST">
+                                        <input type="hidden" name="transactionId" value="<%= bet._id %>">
+                                        <button type="submit" class="action-btn btn-cancel">Cancel</button>
+                                    </form>
+                                    <% } else { %>
+                                        <span class="text-red-500 font-bold text-xs uppercase">Cancelled</span>
+                                        <% } %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Users -->
+        <h2 class="section-header">All Users</h2>
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Balance</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(u=> { %>
+                        <tr>
+                            <td class="font-bold text-white">
+                                <%= u.firstName %>
+                                    <%= u.lastName %>
+                            </td>
+                            <td class="text-slate-400">
+                                <%= u.email %>
+                            </td>
+                            <td class="font-mono text-green-400">R <%= u.walletBalance.toFixed(2) %>
+                            </td>
+                            <td>
+                                <% if (u.isAdmin) { %>
+                                    <span
+                                        class="bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded text-xs font-bold uppercase">Admin</span>
+                                    <% } else { %>
+                                        <span class="text-slate-500 text-xs uppercase">User</span>
+                                        <% } %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav
+        class="fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 flex justify-around p-4 z-40">
+        <a href="/game" class="text-slate-500 flex flex-col items-center gap-1 hover:text-yellow-500"><i
+                class="fas fa-home"></i><span class="text-[8px]">HOME</span></a>
+        <a href="/wallet" class="text-slate-500 flex flex-col items-center gap-1 hover:text-yellow-500"><i
+                class="fas fa-wallet"></i><span class="text-[8px]">WALLET</span></a>
+        <a href="/admin" class="text-yellow-500 flex flex-col items-center gap-1"><i class="fas fa-shield-alt"></i><span
+                class="text-[8px]">ADMIN</span></a>
+    </nav>
+
+</body>
+
+</html>

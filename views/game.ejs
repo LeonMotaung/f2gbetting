@@ -122,61 +122,76 @@
         </div>
     </div>
 
+    <!-- Bet Result Modal -->
+    <div id="betResultModal"
+        class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-800 rounded-3xl p-6 max-w-sm w-full border border-slate-700 shadow-2xl transform scale-95 transition-transform duration-300"
+            id="modalContent">
+            <div id="modalIcon" class="text-6xl text-center mb-4"></div>
+            <h3 id="modalTitle" class="text-2xl font-black text-center text-white mb-2 uppercase"></h3>
+            <p id="modalMessage" class="text-slate-400 text-center mb-6 leading-relaxed"></p>
+            <button onclick="closeModal()"
+                class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold rounded-xl py-3 shadow-lg shadow-yellow-500/20 transition-all">
+                CONTINUE
+            </button>
+        </div>
+    </div>
+
     <script>
         const fafiData = [
-  { n: 1, title: "Water", tags: ["river", "sea", "drink", "bath", "rain"] },
-  { n: 2, title: "Fish", tags: ["sea", "food", "luck", "wealth"] },
-  { n: 3, title: "Snake", tags: ["enemy", "danger", "betrayal", "fear"] },
-  { n: 4, title: "Old Woman", tags: ["granny", "witch", "wisdom"] },
-  { n: 5, title: "Tiger", tags: ["fight", "power", "strong man"] },
-  { n: 6, title: "Money", tags: ["cash", "gold", "riches", "payment"] },
-  { n: 7, title: "Accident", tags: ["injury", "crash", "trouble"] },
-  { n: 8, title: "Child", tags: ["baby", "son", "daughter"] },
-  { n: 9, title: "Fire", tags: ["burning", "anger", "heat"] },
-  { n: 10, title: "Dog", tags: ["friend", "loyalty", "protector"] },
-  { n: 11, title: "Cow", tags: ["cattle", "wealth", "bride price"] },
-  { n: 12, title: "Prison", tags: ["jail", "arrest", "police"] },
-  { n: 13, title: "Death", tags: ["ending", "loss", "funeral"] },
-  { n: 14, title: "Drunk Man", tags: ["alcohol", "beer", "party"] },
-  { n: 15, title: "Woman", tags: ["lady", "girlfriend", "wife"] },
-  { n: 16, title: "Man", tags: ["husband", "boyfriend", "male"] },
-  { n: 17, title: "Wedding", tags: ["marriage", "bride", "groom"] },
-  { n: 18, title: "Coffin", tags: ["funeral", "box", "death"] },
-  { n: 19, title: "Doctor", tags: ["hospital", "medicine", "healing"] },
-  { n: 20, title: "House", tags: ["home", "building", "family"] },
-  { n: 21, title: "Mountain", tags: ["hill", "obstacle", "strength"] },
-  { n: 22, title: "Road", tags: ["path", "journey", "travel"] },
-  { n: 23, title: "Family", tags: ["relatives", "home", "unity"] },
-  { n: 24, title: "Car", tags: ["taxi", "transport", "travel"] },
-  { n: 25, title: "Policeman", tags: ["law", "arrest", "authority"] },
-  { n: 26, title: "Tree", tags: ["growth", "life", "roots"] },
-  { n: 27, title: "Bird", tags: ["freedom", "news", "message"] },
-  { n: 28, title: "Love", tags: ["romance", "relationship", "heart"] },
-  { n: 29, title: "Rain", tags: ["blessing", "weather", "cleansing"] },
-  { n: 30, title: "Church", tags: ["prayer", "faith", "religion"] },
-  { n: 31, title: "Shoes", tags: ["journey", "movement", "travel"] },
-  { n: 32, title: "Baby", tags: ["newborn", "new beginning"] },
-  { n: 33, title: "Bed", tags: ["sleep", "rest", "sex"] },
-  { n: 34, title: "School", tags: ["education", "learning", "teacher"] },
-  { n: 35, title: "Knife", tags: ["danger", "fight", "weapon"] },
-  { n: 36, title: "River", tags: ["flow", "water", "journey"] },
-  { n: 37, title: "Thief", tags: ["stealing", "loss", "crime"] },
-  { n: 38, title: "Gun", tags: ["violence", "danger", "threat"] },
-  { n: 39, title: "Visitor", tags: ["guest", "arrival", "news"] },
-  { n: 40, title: "Grave", tags: ["burial", "death", "ending"] },
-  { n: 41, title: "Mirror", tags: ["reflection", "self", "truth"] },
-  { n: 42, title: "New Shoes", tags: ["new journey", "change"] },
-  { n: 43, title: "Food", tags: ["eating", "hunger", "feast"] },
-  { n: 44, title: "Phone", tags: ["message", "call", "news"] },
-  { n: 45, title: "Blood", tags: ["injury", "family", "danger"] },
-  { n: 46, title: "Shop", tags: ["market", "buying", "selling"] },
-  { n: 47, title: "Road Accident", tags: ["crash", "danger", "warning"] },
-  { n: 48, title: "Boss", tags: ["work", "authority", "manager"] },
-  { n: 49, title: "Dream", tags: ["vision", "message", "sign"] },
-  { n: 50, title: "Angel", tags: ["protection", "spirit", "guidance"] },
-  { n: 51, title: "Journey", tags: ["travel", "movement", "change"] },
-  { n: 52, title: "Luck", tags: ["chance", "fortune", "win"] }
-];
+            { n: 1, title: "Water", tags: ["river", "sea", "drink", "bath", "rain"] },
+            { n: 2, title: "Fish", tags: ["sea", "food", "luck", "wealth"] },
+            { n: 3, title: "Snake", tags: ["enemy", "danger", "betrayal", "fear"] },
+            { n: 4, title: "Old Woman", tags: ["granny", "witch", "wisdom"] },
+            { n: 5, title: "Tiger", tags: ["fight", "power", "strong man"] },
+            { n: 6, title: "Money", tags: ["cash", "gold", "riches", "payment"] },
+            { n: 7, title: "Accident", tags: ["injury", "crash", "trouble"] },
+            { n: 8, title: "Child", tags: ["baby", "son", "daughter"] },
+            { n: 9, title: "Fire", tags: ["burning", "anger", "heat"] },
+            { n: 10, title: "Dog", tags: ["friend", "loyalty", "protector"] },
+            { n: 11, title: "Cow", tags: ["cattle", "wealth", "bride price"] },
+            { n: 12, title: "Prison", tags: ["jail", "arrest", "police"] },
+            { n: 13, title: "Death", tags: ["ending", "loss", "funeral"] },
+            { n: 14, title: "Drunk Man", tags: ["alcohol", "beer", "party"] },
+            { n: 15, title: "Woman", tags: ["lady", "girlfriend", "wife"] },
+            { n: 16, title: "Man", tags: ["husband", "boyfriend", "male"] },
+            { n: 17, title: "Wedding", tags: ["marriage", "bride", "groom"] },
+            { n: 18, title: "Coffin", tags: ["funeral", "box", "death"] },
+            { n: 19, title: "Doctor", tags: ["hospital", "medicine", "healing"] },
+            { n: 20, title: "House", tags: ["home", "building", "family"] },
+            { n: 21, title: "Mountain", tags: ["hill", "obstacle", "strength"] },
+            { n: 22, title: "Road", tags: ["path", "journey", "travel"] },
+            { n: 23, title: "Family", tags: ["relatives", "home", "unity"] },
+            { n: 24, title: "Car", tags: ["taxi", "transport", "travel"] },
+            { n: 25, title: "Policeman", tags: ["law", "arrest", "authority"] },
+            { n: 26, title: "Tree", tags: ["growth", "life", "roots"] },
+            { n: 27, title: "Bird", tags: ["freedom", "news", "message"] },
+            { n: 28, title: "Love", tags: ["romance", "relationship", "heart"] },
+            { n: 29, title: "Rain", tags: ["blessing", "weather", "cleansing"] },
+            { n: 30, title: "Church", tags: ["prayer", "faith", "religion"] },
+            { n: 31, title: "Shoes", tags: ["journey", "movement", "travel"] },
+            { n: 32, title: "Baby", tags: ["newborn", "new beginning"] },
+            { n: 33, title: "Bed", tags: ["sleep", "rest", "sex"] },
+            { n: 34, title: "School", tags: ["education", "learning", "teacher"] },
+            { n: 35, title: "Knife", tags: ["danger", "fight", "weapon"] },
+            { n: 36, title: "River", tags: ["flow", "water", "journey"] },
+            { n: 37, title: "Thief", tags: ["stealing", "loss", "crime"] },
+            { n: 38, title: "Gun", tags: ["violence", "danger", "threat"] },
+            { n: 39, title: "Visitor", tags: ["guest", "arrival", "news"] },
+            { n: 40, title: "Grave", tags: ["burial", "death", "ending"] },
+            { n: 41, title: "Mirror", tags: ["reflection", "self", "truth"] },
+            { n: 42, title: "New Shoes", tags: ["new journey", "change"] },
+            { n: 43, title: "Food", tags: ["eating", "hunger", "feast"] },
+            { n: 44, title: "Phone", tags: ["message", "call", "news"] },
+            { n: 45, title: "Blood", tags: ["injury", "family", "danger"] },
+            { n: 46, title: "Shop", tags: ["market", "buying", "selling"] },
+            { n: 47, title: "Road Accident", tags: ["crash", "danger", "warning"] },
+            { n: 48, title: "Boss", tags: ["work", "authority", "manager"] },
+            { n: 49, title: "Dream", tags: ["vision", "message", "sign"] },
+            { n: 50, title: "Angel", tags: ["protection", "spirit", "guidance"] },
+            { n: 51, title: "Journey", tags: ["travel", "movement", "change"] },
+            { n: 52, title: "Luck", tags: ["chance", "fortune", "win"] }
+        ];
 
 
         const grid = document.getElementById('fafiGrid');
@@ -255,9 +270,55 @@
             panel.style.transform = show ? "translateY(0)" : "translateY(100%)";
         }
 
+        function showModal(success, title, message) {
+            const modal = document.getElementById('betResultModal');
+            const content = document.getElementById('modalContent');
+            const icon = document.getElementById('modalIcon');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+
+            modal.classList.remove('hidden');
+            // Trigger animation
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+
+            if (success) {
+                icon.innerHTML = '<i class="fas fa-check-circle text-green-400 bounce-in"></i>';
+                titleEl.className = "text-2xl font-black text-center text-green-400 mb-2 uppercase";
+            } else {
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500 bounce-in"></i>';
+                titleEl.className = "text-2xl font-black text-center text-red-500 mb-2 uppercase";
+            }
+
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('betResultModal');
+            const content = document.getElementById('modalContent');
+
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
         async function confirmBet() {
             const amount = document.getElementById('stake').value;
             if (!selectedNumber || !amount) return;
+
+            // Show loading state on button
+            const btn = document.querySelector('button[onclick="confirmBet()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESSING';
+            btn.disabled = true;
 
             try {
                 const res = await fetch('/bet', {
@@ -268,17 +329,21 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    alert(data.message);
+                    showModal(true, "Bet Placed!", data.message);
                     // Update Wallet Display
                     document.querySelector('.font-mono').innerText = `R ${data.newBalance.toFixed(2)}`;
                     togglePanel(false);
-                    fetchOdds(); // Refresh odds immediately
+                    fetchOdds();
                 } else {
-                    alert(data.error || "Bet failed");
+                    showModal(false, "Bet Failed", data.error || "Could not place bet.");
                 }
             } catch (err) {
                 console.error(err);
-                alert("Failed to place bet");
+                showModal(false, "Error", "Failed to connect to server.");
+            } finally {
+                // Reset button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
