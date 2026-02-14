@@ -32,6 +32,10 @@ const GameRoundSchema = new mongoose.Schema({
     },
     winningLedgerHash: {
         type: String
+    },
+    payoutMultiplier: {
+        type: Number,
+        default: 28.0
     }
 });
 

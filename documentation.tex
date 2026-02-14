@@ -1,0 +1,230 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+
+% Geometry settings
+\geometry{
+    a4paper,
+    total={170mm,257mm},
+    left=20mm,
+    top=20mm,
+}
+
+% Code listing settings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\title{\textbf{Fafi2Go System Documentation}}
+\author{Leon Motaung \\ Lead Systems Architect}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+Fafi2Go (f2g) is a web-based betting application that modernizes the traditional Fafi game. It allows users to bet on numbers (1-52), manage a digital wallet, and participate in daily draws. The system is built with transparency and risk management at its core, utilizing the Stellar Blockchain for verifiable random number generation and an Evolutionary Stability Index (ESI) algorithm for dynamic odds calculation.
+
+\section{System Architecture}
+
+\subsection{Tech Stack}
+The application follows a monolithic MVC (Model-View-Controller) architecture using the following technologies:
+
+\begin{itemize}
+    \item \textbf{Runtime Environment}: Node.js
+    \item \textbf{Web Framework}: Express.js
+    \item \textbf{Database}: MongoDB (via Mongoose ODM)
+    \item \textbf{Frontend}: EJS (Embedded JavaScript) templating engine, CSS and Tailwind CSS.
+    \item \textbf{Authentication}: Session-based authentication (\texttt{express-session}).
+    \item \textbf{Blockchain Integration}: Stellar SDK (for RNG).
+    \item \textbf{Payment Gateway}: Yoco (for South African Rand deposits).
+\end{itemize}
+
+\subsection{Architectural Diagram (Conceptual)}
+\begin{verbatim}
+[Client (Browser)] <--> [Express Server (Node.js)] <--> [MongoDB]
+                                  ^
+                                  |
+                           [Stellar Network] (For Draw Results)
+\end{verbatim}
+
+\section{Core Components}
+
+\subsection{Server Entry Point (\texttt{server.js})}
+The \texttt{server.js} file serves as the main entry point and controller of the application. It handles:
+\begin{enumerate}
+    \item \textbf{Middleware Configuration}: Body parsing, session management, static file serving, and authentication guards.
+    \item \textbf{Routing}: Defines all HTTP endpoints for views and APIs.
+    \item \textbf{Game Logic Scheduler}: A background interval that checks every minute to resolve the daily draw at 17:00.
+    \item \textbf{Stellar Integration}: Polls the Stellar network for the next ledger hash to determine the winning number.
+\end{enumerate}
+
+\subsection{Risk Management Engine (ESI)}
+The Evolutionary Stability Index (ESI) is a unique algorithm implemented to manage the "heat" of numbers.
+\begin{itemize}
+    \item \textbf{Concept}: If a number wins, its ESI increases (resistance builds), eventually lowering its payout multiplier to protect the house.
+    \item \textbf{Logic}:
+    \begin{itemize}
+        \item Winning number: ESI increases, Payout Multiplier drops.
+        \item Losing numbers: ESI decays slowly back to 1.0.
+        \item Automatic recovery: Multipliers slowly drift back towards the standard 28.0x over time.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Fairness & RNG}
+To ensure fairness, the winning number is derived from the hash of a future Stellar Ledger.
+\begin{itemize}
+    \item \textbf{Procedure}: At draw time (17:00), the system waits for the \textit{next} ledger sequence.
+    \item \textbf{Calculation}: \texttt{Winning Number = (LedgerHashHex \% 52) + 1}.
+    \item This makes the result verifiable and impossible to manipulate by the house.
+\end{itemize}
+
+\section{Database Schema (Models)}
+
+\subsection{User Model (\texttt{User.js})}
+Stores user account information.
+\begin{itemize}
+    \item \texttt{email}, \texttt{password} (hashed): Credentials.
+    \item \texttt{walletBalance}: Current funds available.
+    \item \texttt{verificationStatus}, \texttt{documents}: KYC details.
+\end{itemize}
+
+\subsection{Transaction Model (\texttt{Transaction.js})}
+Records all financial movements.
+\begin{itemize}
+    \item \texttt{type}: 'deposit', 'withdrawal', 'bet', 'win'.
+    \item \texttt{amount}: Value in ZAR.
+    \item \texttt{status}: 'pending', 'completed'.
+\end{itemize}
+
+\subsection{GameRound Model (\texttt{GameRound.js})}
+Represents a single betting cycle (Daily Draw).
+\begin{itemize}
+    \item \texttt{roundId}, \texttt{startTime}, \texttt{endTime}.
+    \item \texttt{winningNumber}: Result of the draw.
+    \item \texttt{winningLedgerHash}: Proof of fairness.
+    \item \texttt{bets}: Map of numbers to total amounts bet.
+\end{itemize}
+
+\subsection{NumberStats Model (\texttt{NumberStats.js})}
+Persistent storage for the ESI algorithm.
+\begin{itemize}
+    \item \texttt{number}: 1-52.
+    \item \texttt{esi}: Current resistance factor.
+    \item \texttt{currentPayoutMultiplier}: Dynamic odds for the number.
+\end{itemize}
+
+\section{Project Structure}
+
+\begin{lstlisting}[language=bash]
+f2g/
+|-- models/             # Mongoose Schemas
+|   |-- User.js
+|   |-- Transaction.js
+|   |-- GameRound.js
+|   |-- NumberStats.js
+|-- public/             # Static assets (images, css, js)
+|   |-- uploads/        # User uploaded KYC docs
+|   |-- css/
+|-- views/              # EJS Templates
+|   |-- game.ejs        # Main betting interface
+|   |-- wallet.ejs      # User wallet view
+|   |-- login.ejs       # Auth pages
+|   |-- ...
+|-- server.js           # Main application logic
+|-- package.json        # Dependencies
+|-- .env                # Environment variables
+\end{lstlisting}
+
+\section{Installation & Setup}
+
+\subsection{Prerequisites}
+\begin{itemize}
+    \item Node.js (v14+)
+    \item MongoDB Instance (Local or Atlas)
+\end{itemize}
+
+\subsection{Steps}
+\begin{enumerate}
+    \item \textbf{Clone the repository}:
+    \begin{lstlisting}
+    git clone https://github.com/LeonMotaung/f2gbetting.git
+    cd f2gbetting
+    \end{lstlisting}
+    
+    \item \textbf{Install Dependencies}:
+    \begin{lstlisting}
+    npm install
+    \end{lstlisting}
+    
+    \item \textbf{Configure Environment}:
+    Create a \texttt{.env} file with the following:
+    \begin{lstlisting}
+    PORT=3001
+    MONGO_URI=mongodb://localhost:27017/f2g
+    SESSION_SECRET=your_secret_key
+    YOCO_SECRET_KEY=sk_test_...
+    \end{lstlisting}
+    
+    \item \textbf{Run the Server}:
+    \begin{lstlisting}
+    npm run dev
+    \end{lstlisting}
+    
+    \item \textbf{Access}:
+    Open \texttt{http://localhost:3001} in your browser.
+\end{enumerate}
+
+\section{API Routes}
+
+\subsection{Authentication}
+\begin{itemize}
+    \item \texttt{GET /login}, \texttt{POST /login}: User login.
+    \item \texttt{GET /signup}, \texttt{POST /signup}: User registration.
+    \item \texttt{GET /logout}: Terminate session.
+\end{itemize}
+
+\subsection{Game}
+\begin{itemize}
+    \item \texttt{GET /game}: Main dashboard.
+    \item \texttt{GET /api/odds}: Returns current round info and ESI-adjusted odds.
+    \item \texttt{POST /bet}: Places a bet on a number (requires auth).
+\end{itemize}
+
+\subsection{Wallet}
+\begin{itemize}
+    \item \texttt{GET /wallet}: View balance and history.
+    \item \texttt{POST /api/deposit/yoco}: Initiate a Yoco payment.
+    \item \texttt{POST /withdraw}: Request a withdrawal.
+\end{itemize}
+
+\end{document}

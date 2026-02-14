@@ -4,14 +4,13 @@ const mongoose = require('mongoose');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log(err));
+// Connect to MongoDB (Moved to startServer function at the end)
 
 // EJS
 app.set('view engine', 'ejs');
-app.use('/static', express.static('static'));
+// Serve public folder as static assets
+
+app.use(express.static('public'));
 
 // Bodyparser
 const session = require('express-session');
@@ -204,6 +203,10 @@ function checkFileType(file, cb) {
         cb('Error: Images Only!');
     }
 }
+
+app.get('/how-to-play', (req, res) => {
+    res.render('how-to-play', { user: req.session.user });
+});
 
 app.get('/profile', ensureAuthenticated, async (req, res) => {
     try {
@@ -401,7 +404,7 @@ async function ensureNumberStats() {
         }
     }
 }
-ensureNumberStats(); // Run on startup
+// ensureNumberStats(); // Run on startup (Moved to startServer function)
 
 async function updateESI(winningNumber) {
     const GAMMA = 0.8;
@@ -415,7 +418,7 @@ async function updateESI(winningNumber) {
         // P_{t+1} = P_t + gamma * (1 - 1/ESI) * (P_inf - P_t) + epsilon
         // Simplified: Volatility Adjustment
 
-        if (stat.number === winningNumber) {
+        if (stat.number === winningNumber) { 
             // Winner: ESI Increases (Resistance builds)
             // If it wins, it becomes "Hot", ESI goes UP.
             stat.esi = Math.min(stat.esi + 1.5, 15); // Cap at 15
@@ -466,10 +469,17 @@ async function updateESI(winningNumber) {
 async function getActiveRound() {
     let round = await GameRound.findOne({ status: 'active' });
     if (!round) {
+        const now = new Date();
+        let targetEnd = new Date();
+        targetEnd.setHours(17, 0, 0, 0);
+        if (now >= targetEnd) {
+            targetEnd.setDate(targetEnd.getDate() + 1);
+        }
+
         round = new GameRound({
             roundId: Date.now().toString(),
-            startTime: new Date(),
-            endDate: new Date(Date.now() + 1000 * 60 * 30), // 30 mins
+            startTime: now,
+            endTime: targetEnd,
             status: 'active',
             bets: {}
         });
@@ -486,6 +496,10 @@ app.get('/api/odds', async (req, res) => {
 
         // Fetch Dynamic ESI Stats
         const stats = await NumberStats.find();
+
+        // Fetch Last Round Hash
+        const lastRound = await GameRound.findOne({ status: 'completed' }).sort({ endTime: -1 });
+        const lastHash = lastRound ? lastRound.winningLedgerHash : 'Pending First Draw...';
 
         // Map stats to odds object
         // If stats are missing for some reason, default to 28.0
@@ -504,7 +518,8 @@ app.get('/api/odds', async (req, res) => {
             roundId: round.roundId,
             odds: odds,
             startTime: round.startTime,
-            endTime: round.endTime
+            endTime: round.endTime,
+            lastHash: lastHash
         });
     } catch (err) {
         console.error(err);
@@ -616,14 +631,17 @@ app.post('/bet', ensureAuthenticated, async (req, res) => {
 });
 
 // Scheduler (Daily Draw Resolution)
-setInterval(async () => {
-    // Check if it's 17:00 or current round has expired
-    const round = await GameRound.findOne({ status: 'active' });
-    // Check if round exists and end time passed
-    if (round && round.endTime && new Date() > round.endTime) {
-        resolveDailyDraw(round);
-    }
-}, 60 * 1000); // Check every minute
+function startScheduler() {
+    setInterval(async () => {
+        if (mongoose.connection.readyState !== 1) return;
+        // Check if it's 17:00 or current round has expired
+        const round = await GameRound.findOne({ status: 'active' });
+        // Check if round exists and end time passed
+        if (round && round.endTime && new Date() > round.endTime) {
+            resolveDailyDraw(round);
+        }
+    }, 60 * 1000); // Check every minute
+}
 
 let processingDraw = false;
 
@@ -648,6 +666,12 @@ async function resolveDailyDraw(round) {
         round.winningNumber = winningNumber;
         round.winningLedgerSequence = sequence;
         round.winningLedgerHash = hash;
+
+        // Odds: Fetch dynamic odds first to save them
+        const stat = await NumberStats.findOne({ number: winningNumber });
+        const odds = stat ? stat.currentPayoutMultiplier : 28.0;
+        round.payoutMultiplier = odds;
+
         round.status = 'completed';
         await round.save();
 
@@ -659,9 +683,9 @@ async function resolveDailyDraw(round) {
             description: { $regex: winPattern }
         }).populate('userId');
 
-        // Odds: Fetch dynamic odds
-        const stat = await NumberStats.findOne({ number: winningNumber });
-        const odds = stat ? stat.currentPayoutMultiplier : 28.0; // Default 28 used if no stats
+        // Odds: Fetch dynamic odds (Already fetched above)
+        // const stat = await NumberStats.findOne({ number: winningNumber });
+        // const odds = stat ? stat.currentPayoutMultiplier : 28.0; 
 
         console.log(`Winners: ${winningBets.length}. Payout Multiplier: ${odds.toFixed(2)}x`);
 
@@ -770,6 +794,7 @@ app.get('/results', ensureAuthenticated, async (req, res) => {
         res.redirect('/game');
     }
 });
+
 const ensureAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.isAdmin) {
         return next();
@@ -839,21 +864,17 @@ app.post('/admin/bet/cancel', ensureAdmin, async (req, res) => {
         if (!tx || tx.type !== 'bet' || tx.status === 'cancelled') {
             return res.redirect('/admin?error=Invalid transaction');
         }
-
         // Refund User
         await User.findByIdAndUpdate(tx.userId, {
             $inc: { walletBalance: tx.amount }
         });
-
         // Update Transaction
         tx.status = 'cancelled';
         tx.description += ' (Cancelled by Admin)';
         await tx.save();
-
         // Update Game Round (Decrease bet amount on number)
         // This is complex if round is over. Assuming active round for now.
         // For simplicity, we just refund user. Analytics might be slightly off for that round.
-
         res.redirect('/admin?message=Bet cancelled and refunded');
     } catch (err) {
         console.error(err);
@@ -869,17 +890,14 @@ app.post('/admin/deposit/approve', ensureAdmin, async (req, res) => {
         if (!tx || tx.type !== 'deposit' || tx.status !== 'pending') {
             return res.redirect('/admin?error=Invalid transaction');
         }
-
         // Credit User
         await User.findByIdAndUpdate(tx.userId, {
             $inc: { walletBalance: tx.amount }
         });
-
         // Update Transaction
         tx.status = 'completed';
         tx.description += ' (Approved by Admin)';
         await tx.save();
-
         res.redirect('/admin?message=Deposit approved');
     } catch (err) {
         console.error(err);
@@ -887,4 +905,22 @@ app.post('/admin/deposit/approve', ensureAdmin, async (req, res) => {
     }
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`Server started on port ${PORT}`));
+
+
+
+const startServer = async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        console.log('MongoDB Connected');
+
+        await ensureNumberStats();
+        startScheduler();
+
+        app.listen(PORT, '0.0.0.0', () => console.log(`Server started on port ${PORT}`));
+    } catch (err) {
+        console.error('Failed to connect to MongoDB', err);
+        process.exit(1);
+    }
+};
+
+startServer();
