@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="static/f2g1.png" alt="Fafi2Go Logo" width="120px">
+  <img src="public/static/f2g1.png" alt="Fafi2Go Logo" width="120px">
 </p>
 
 <h1 align="center">Fafi2Go (F2G)</h1>
@@ -24,7 +24,7 @@
 
 ### Key Visuals
 <p align="center">
-  <img src="static/f2g.png" alt="Fafi2Go Card Design" width="400px" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <img src="public/static/f2g.png" alt="Fafi2Go Card Design" width="400px" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
   <br>
   <em>Premium User Interface for Leon Motaung</em>
 </p>
